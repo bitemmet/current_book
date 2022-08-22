@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Defining the OverrideCode enum</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Defining the OverrideCode enum</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>OverrideCode</kbd> enum gives typesafe definitions and names to the different override codes from the linked library. This code associates named enum values with the numerical enumerated values returned or sent to the FFI. Notice the syntax pattern assigning integer values to each enum element:</p>
+<pre>pub enum OverrideCode {<br/>   IssueOverride = 1,<br/>   IssuePrivileged = 2,<br/>   IssueAdmin = 3,<br/>   IssueInputFloor = 4,<br/>   IssueManualMode = 5,<br/>   IssueNormalMode = 6,<br/>   IssueFlash = 7,<br/>   IssueToggleLight = 8,<br/>   IssueSetLightColor = 9,<br/>}<br/><br/>pub fn toOverrideCode(i: i32) -&gt; OverrideCode {<br/>   match i {<br/>      1 =&gt; OverrideCode::IssueOverride,<br/>      2 =&gt; OverrideCode::IssuePrivileged,<br/>      3 =&gt; OverrideCode::IssueAdmin,<br/>      4 =&gt; OverrideCode::IssueInputFloor,<br/>      5 =&gt; OverrideCode::IssueManualMode,<br/>      6 =&gt; OverrideCode::IssueNormalMode,<br/>      7 =&gt; OverrideCode::IssueFlash,<br/>      8 =&gt; OverrideCode::IssueToggleLight,<br/>      9 =&gt; OverrideCode::IssueSetLightColor,<br/>      _ =&gt; panic!("Unexpected override code: {}", i)<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,32 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Unit testing</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Unit testing</h1>
+                </header>
+            
+            <article>
+                
+<p>Unit testing focuses on testing internal interfaces and components of a program. It is also called <strong>whitebox testing</strong>. To first create unit tests, it is a good idea to look at all of the top-level types, traits, and functions. All top-level identifiers make for good test cases. Depending on the structure of the program, it may also be a good idea to test combinations of these components to cover expected use cases.</p>
+<p>We have one utility function, the statistic calculation, which would be a good candidate to write a unit test for. However, this function doesn't return any result. Instead, it immediately prints output to the console. To test this, we should break the function into two components—one that calculates the statistics, and a second function that prints the statistics. This would look as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">fn variable_summary&lt;W: Write&gt;(stdout: &amp;mut raw::RawTerminal&lt;W&gt;, vname: &amp;str, data: Vec&lt;f64&gt;)<br/>{<br/></span><span class="s1">   let (avg, dev) = variable_summary_stats(data);<br/></span><span class="s1">   variable_summary_print(stdout, vname, avg, dev);<br/></span><span class="s1">}<br/><br/>fn variable_summary_stats(data: Vec&lt;f64&gt;) -&gt; (f64, f64)<br/></span><span class="s1">{<br/></span><span class="s1">   //calculate statistics<br/></span><span class="s1">   let N = data.len();<br/></span><span class="s1">   let sum: f64 = data.iter().sum();</span><span class="s1"><br/></span><span class="s1">   let avg = sum / (N as f64);<br/></span><span class="s1">   let dev = (<br/></span><span class="s1">      data.clone().into_iter()<br/></span><span class="s1">      .map(|v| (v - avg).powi(2))<br/></span><span class="s1">      .fold(0.0, |a, b| a+b)<br/></span><span class="s1">      / (N as f64)<br/></span><span class="s1">   ).sqrt();<br/></span><span class="s1">   (avg, dev)<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn variable_summary_print&lt;W: Write&gt;(stdout: &amp;mut raw::RawTerminal&lt;W&gt;, vname: &amp;str, avg: f64, dev: f64)<br/></span><span class="s1">{<br/></span><span class="s1">   //print formatted output<br/></span><span class="s1">   write!(stdout, "Average of {:25}{:.6}\r\n", vname, avg);<br/></span><span class="s1">   write!(stdout, "Standard deviation of {:14}{:.6}\r\n", vname, dev);<br/></span><span class="s1">   write!(stdout, "\r\n");<br/></span><span class="s1">}</span></pre>
+<p class="p1">Now that we have isolated the statistics calculation into its own function, we can write unit tests for it much more easily. First, we supply some test data, and then verify each result. Also note that unit tests have access to private functions as long as we add <span class="s1"><kbd>use super::*;</kbd> to the test declaration. Here are some unit tests for our statistics calculation:</span></p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">#[cfg(test)]<br/></span><span class="s1">mod tests {<br/></span><span class="s1">   use super::*;<br/><br/></span><span class="s1">   #[test]<br/></span><span class="s1">   fn variable_stats() {<br/></span><span class="s1">      let test_data = vec![<br/></span><span class="s1">         (vec![1.0, 2.0, 3.0, 4.0, 5.0], 3.0, 1.41),<br/></span><span class="s1">         (vec![1.0, 3.0, 5.0, 7.0, 9.0], 5.0, 2.83),<br/></span><span class="s1">         (vec![1.0, 9.0, 1.0, 9.0, 1.0], 4.2, 3.92),<br/></span><span class="s1">         (vec![1.0, 0.5, 0.7, 0.9, 0.6], 0.74, 0.19),<br/></span><span class="s1">         (vec![200.0, 3.0, 24.0, 92.0, 111.0], 86.0, 69.84),<br/></span><span class="s1">      ];<br/></span><span class="s1">      for (data, avg, dev) in test_data<br/></span><span class="s1">      {<br/></span><span class="s1">         let (ravg, rdev) = variable_summary_stats(data);<br/>         //it is not safe to use direct == operator on floats<br/>         //floats can be *very* close and not equal<br/>         //so instead we check that they are very close in value<br/></span><span class="s1">         assert!( (avg-ravg).abs() &lt; 0.1 );<br/></span><span class="s1">         assert!( (dev-rdev).abs() &lt; 0.1 );<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>Now, if we run <kbd>cargo test</kbd>, the unit tests will run. The result should show one test passing.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

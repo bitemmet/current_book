@@ -1,0 +1,32 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Referencing data is faster</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Referencing data is faster</h1>
+                </header>
+            
+            <article>
+                
+<p>There is a rule of thumb that referencing data is faster than copying data. Similarly, copying data is faster than cloning. This is not always true, but it is a good rule to consider when trying to improve program performance.</p>
+<p>Here is a function that alternatively uses data by reference, copied, intrinsic cloned, or custom cloned:</p>
+<pre class="p1"><span class="s1">extern crate flame;<br/></span><span class="s1">use std::fs::File;<br/><br/></span><span class="s1">fn byref(n: u64, data: &amp;[u64; 1024]) {<br/></span><span class="s1">   if n&gt;0 {<br/></span><span class="s1">      byref(n-1, data);<br/></span><span class="s1">      byref(n-1, data);<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn bycopy(n: u64, data: [u64; 1024]) {<br/></span><span class="s1">   if n&gt;0 {<br/></span><span class="s1"><span class="Apple-converted-space">      </span>bycopy(n-1, data);<br/></span><span class="s1">      bycopy(n-1, data);<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">struct DataClonable([u64; 1024]);<br/></span><span class="s1">impl Clone for DataClonable {<br/></span><span class="s1">   fn clone(&amp;self) -&gt; Self {<br/></span><span class="s1">      let mut newdata = [0; 1024];<br/></span><span class="s1">      for i in 0..1024 {<br/></span><span class="s1">         newdata[i] = self.0[i];<br/></span><span class="s1">      }<br/></span><span class="s1">      DataClonable(newdata)<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn byclone&lt;T: Clone&gt;(n: u64, data: T) {<br/></span><span class="s1">   if n&gt;0 {<br/></span><span class="s1">      byclone(n-1, data.clone());<br/></span><span class="s1">      byclone(n-1, data.clone());<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>Here we declare array of <kbd>1024</kbd> elements. Then using the flamegraph profiling library we apply the above functions to measure the differences between reference, copy and clone performance:</p>
+<pre class="p1"><span class="s1">fn main() {<br/></span><span class="s1">   let data = [0; 1024];<br/></span><span class="s1">   flame::start("by reference");<br/></span><span class="s1">   byref(15, &amp;data);<br/></span><span class="s1">   flame::end("by reference");<br/><br/></span><span class="s1">   let data = [0; 1024];<br/></span><span class="s1">   flame::start("by copy");<br/></span><span class="s1">   bycopy(15, data);<br/></span><span class="s1">   flame::end("by copy");<br/><br/></span><span class="s1">   let data = [0; 1024];<br/></span><span class="s1">   flame::start("by clone");<br/></span><span class="s1">   byclone(15, data);<br/></span><span class="s1">   flame::end("by clone");<br/><br/></span><span class="s1">   let data = DataClonable([0; 1024]);<br/></span><span class="s1">   flame::start("by clone (with extras)");<br/></span><span class="s1">   //2^4 instead of 2^15!!!!<br/></span><span class="s1">   byclone(4, data);<br/></span><span class="s1">   flame::end("by clone (with extras)");<br/><br/></span><span class="s1">   flame::dump_html(&amp;mut File::create("flame-graph.html").unwrap()).unwrap();<br/></span><span class="s1">}</span></pre>
+<p>Looking at the runtime of this application, we see that the referenced data uses only a small sliver of the resources compared to copying or cloning this data. The default clone and copy traits unsurprisingly give a similar performance. The custom clone is really slow. It does semantically the same thing as all the others, but it is not as optimized at a low level.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

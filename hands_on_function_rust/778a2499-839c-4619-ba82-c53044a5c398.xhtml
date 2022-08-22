@@ -1,0 +1,36 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Using typesafe interfaces instead of stringly typed interfaces</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Using typesafe interfaces instead of stringly typed interfaces</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">Enumerations in Rust are less error-prone than using numbers or strings. Whenever possible, write the following code:</span></p>
+<pre class="p1"><span class="s1">const MyEnum_A: u32 = 1;<br/></span><span class="s1">const MyEnum_B: u32 = 2;<br/></span><span class="s1">const MyEnum_C: u32 = 3;</span></pre>
+<p class="p1"><span class="s1">Similarly, you can write a stringly enumeration:</span></p>
+<pre class="p1"><span class="s1">"a"<br/>"b"<br/>"c"</span></pre>
+<p class="p1"><span class="s1">It is better to use the following enum type:</span></p>
+<pre class="p1"><span class="s1">enum MyEnum {<br/></span><span class="s1">   A,<br/></span><span class="s1">   B,<br/></span><span class="s1">   C,<br/></span><span class="s1">}</span></pre>
+<p class="p1"><span class="s1">This way, functions accepting the enumeration will be typesafe:</span></p>
+<pre class="p1"><span class="s1">fn foo(n: u64) {} //not all u64 are valid inputs<br/></span><span class="s1">fn bar(n: &amp;str) {} //not all &amp;str are valid inputs<br/></span><span class="s1">fn baz(n: MyEnum) {} //all MyEnum are valid</span></pre>
+<p class="p1"><span class="s1">Enums also fit naturally with pattern matching for the same reason. Pattern matching against an enumeration does not require a final error case like the integer or string typed case would:</span></p>
+<pre class="p1"><span class="s1">match a {<br/></span><span class="s1">   1 =&gt; println!(“1 is ok”),<br/></span><span class="s1">   2 =&gt; println!(“2 is ok”),<br/></span><span class="s1">   3 =&gt; println!(“3 is ok”),<br/></span><span class="s1">   n =&gt; println!(“{} was unexpected”, n)<br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

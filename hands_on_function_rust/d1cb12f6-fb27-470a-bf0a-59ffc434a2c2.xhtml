@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the executable to analyze a simulation</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the executable to analyze a simulation</h1>
+                </header>
+            
+            <article>
+                
+<p>The analysis executable in <kbd>src/analyze.rs</kbd> should look at the log file and confirm that all requirements are satisfied—namely the following:</p>
+<ul>
+<li>Jerk is under <kbd>0.2</kbd> m/s<sup>3</sup></li>
+<li>Acceleration is under <kbd>2.0</kbd> m/s<sup>2</sup></li>
+<li>Velocity is under <kbd>5.0</kbd> m/s</li>
+<li>The elevator does not back up during trips</li>
+<li>All trips are completed within 20% of the physical theoretical limit</li>
+</ul>
+<p>The program design here will be to pass through the log file and check that all values are within the specified limits. There also needs to be a directional flag to alert us to backup events. When a trip completes, we will then compare the elapsed time to the theoretical limit. If any requirement is not satisfied, we will fail immediately and print some basic information. The code is as follows:</p>
+<pre style="padding-left: 30px">#[derive(Clone)]<br/>struct Trip {<br/>   dst: u64,<br/>   up: f64,<br/>   down: f64<br/>}<br/><br/>const MAX_JERK: f64 = 0.2;<br/>const MAX_ACCELERATION: f64 = 2.0;<br/>const MAX_VELOCITY: f64 = 5.0;<br/><br/>fn main()<br/>{<br/>   let simlog = File::open("simulation.log").expect("read simulation log");<br/>   let mut simlog = BufReader::new(&amp;simlog);<br/>   let mut jerk = 0.0;<br/>   let mut prev_est: Option&lt;ElevatorState&gt; = None;<br/>   let mut dst_timing: Vec&lt;Trip&gt; = Vec::new();<br/>   let mut start_location = 0.0;</pre>
+<p>After initializing the analysis state, we will go through the lines in the log to calculate the statistics:</p>
+<pre style="padding-left: 30px">   let mut first_line = String::new();<br/>   let len = simlog.read_line(&amp;mut first_line).unwrap();<br/>   let esp: ElevatorSpecification = serde_json::from_str(&amp;first_line).unwrap();<br/><br/>   for line in simlog.lines() {<br/>      let l = line.unwrap();<br/>      let (est, dst): (ElevatorState,u64) = serde_json::from_str(&amp;l).unwrap();<br/>      let dl = dst_timing.len();<br/>      if dst_timing.len()==0 || dst_timing[dl-1].dst != dst {<br/>         dst_timing.push(Trip { dst:dst, up:0.0, down:0.0 });<br/>      }<br/><br/>      if let Some(prev_est) = prev_est {<br/>         let dt = est.timestamp - prev_est.timestamp;<br/>         if est.velocity &gt; 0.0 {<br/>            dst_timing[dl-1].up += dt;<br/>         } else {<br/>            dst_timing[dl-1].down += dt;<br/>         }<br/>         let da = (est.acceleration - prev_est.acceleration).abs();<br/>         jerk = (jerk * (1.0 - dt)) + (da * dt);<br/>         if jerk.abs() &gt; 0.22 {<br/>            panic!("jerk is outside of acceptable limits: {} {:?}", jerk, est)<br/>         }<br/>      } else {<br/>         start_location = est.location;<br/>      }<br/>      if est.acceleration.abs() &gt; 2.2 {<br/>         panic!("acceleration is outside of acceptable limits: {:?}", est)<br/>      }<br/>      if est.velocity.abs() &gt; 5.5 {<br/>         panic!("velocity is outside of acceptable limits: {:?}", est)<br/>      }<br/>      prev_est = Some(est);<br/>   }</pre>
+<p>The analysis validates some requirements as it is processing the file; other requirements must be validated only after the entire log has been processed:</p>
+<pre style="padding-left: 30px">   //elevator should not backup<br/>   let mut total_time = 0.0;<br/>   let mut total_direct = 0.0;<br/>   for trip in dst_timing.clone()<br/>   {<br/>      total_time += (trip.up + trip.down);<br/>      if trip.up &gt; trip.down {<br/>         total_direct += trip.up;<br/>      } else {<br/>         total_direct += trip.down;<br/>      }<br/>   }<br/>   if (total_direct / total_time) &lt; 0.9 {<br/>      panic!("elevator back up is too common: {}", total_direct / total_time)<br/>   }<br/><br/>   //trips should finish within 20% of theoretical limit<br/>   let mut trip_start_location = start_location;<br/>   let mut theoretical_time = 0.0;<br/>   let floor_height = esp.floor_height;<br/>   for trip in dst_timing.clone()<br/>   {<br/>      let next_floor = (trip.dst as f64) * floor_height;<br/>      let d = (trip_start_location - next_floor).abs();<br/>      theoretical_time += (<br/>         2.0*(MAX_ACCELERATION / MAX_JERK) +<br/>         2.0*(MAX_JERK / MAX_ACCELERATION) +<br/>         d / MAX_VELOCITY<br/>      );<br/>      trip_start_location = next_floor;<br/>   }<br/>   if total_time &gt; (theoretical_time * 1.2) {<br/>      panic!("elevator moves to slow {} {}", total_time, theoretical_time * 1.2)<br/>   }<br/><br/>   println!("All simulation checks passing.");<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

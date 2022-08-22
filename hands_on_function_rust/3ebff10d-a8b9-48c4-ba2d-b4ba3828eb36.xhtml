@@ -1,0 +1,32 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Validating input and output</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Validating input and output</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">Preconditions and postconditions are a great way to lock down program behavior and find bugs or invalid states before they get out of hand.</span></p>
+<p class="p1"><span class="s1">If you use macros to do this, then the preconditions and postconditions can optionally be run only in debug mode, and removed from production code. The built-in <kbd>debug_assert!</kbd> macro does this. However, using assertions for return values is not particularly elegant and, if you forget to check a branch with a return statement, then your postcondition won't be checked.</span></p>
+<p class="p1"><span class="s1"><kbd>debug_assert!</kbd> is not a good choice for the validation of anything dependent on external data or otherwise nondeterministic behavior. When you want to check preconditions or postconditions in production code, you should instead use <kbd>Result</kbd> or <kbd>Option</kbd> values to handle exceptional behavior.</span></p>
+<p class="p1"><span class="s1">Here are some examples of preconditions and postconditions in Rust:</span></p>
+<pre class="p1"><span class="s1">use std::io;<br/><br/>//This function checks the precondition that [n &lt; 100]<br/></span><span class="s1">fn debug_precondition(n: u64) -&gt; u64 {<br/></span><span class="s1">   debug_assert!(n &lt; 100);<br/></span><span class="s1">   n * n<br/></span><span class="s1">}<br/><br/>//This function checks the postcondition that [return &gt; 10]<br/></span><span class="s1">fn debug_postcondition(n: u64) -&gt; u64 {<br/></span><span class="s1">   let r = n * n;<br/></span><span class="s1">   debug_assert!(r &gt; 10);<br/></span><span class="s1">   r<br/></span><span class="s1">}<br/><br/>//this function dynamically checks the precondition [n &lt; 100]<br/></span><span class="s1">fn runtime_precondition(n: u64) -&gt; Result&lt;u64,()&gt; {<br/></span><span class="s1">   if !(n&lt;100) { return Err(()) };<br/></span><span class="s1">   Ok(n * n)<br/></span><span class="s1">}<br/><br/>//this function dynamically checks the postcondition [return &gt; 10]<br/></span><span class="s1">fn runtime_postcondition(n: u64) -&gt; Result&lt;u64,()&gt; {<br/></span><span class="s1">   let r = n * n;<br/></span><span class="s1">   if !(r&gt;10) { return Err(()) };<br/></span><span class="s1">   Ok(r)<br/></span><span class="s1">}<br/><br/>//This main function uses all of the functions<br/>//The dynamically validated functions are subjected to user input<br/></span><span class="s1">fn main() {<br/></span><span class="s1">   //inward facing code should assert expectations<br/></span><span class="s1">   debug_precondition(5);<br/></span><span class="s1">   debug_postcondition(5);<br/><br/></span><span class="s1">   //outward facing code should handle errors<br/></span><span class="s1">   let mut s = String::new();<br/></span><span class="s1">   println!("Please input a positive integer greater or equal to 4:");<br/></span><span class="s1">   io::stdin().read_line(&amp;mut s).expect("error reading input");<br/></span><span class="s1">   let i = s.trim().parse::&lt;u64&gt;().expect("error parsing input as integer");<br/></span><span class="s1">   runtime_precondition(i).expect("runtime precondition violated");<br/></span><span class="s1">   runtime_postcondition(i).expect("runtime postcondition violated");<br/></span><span class="s1">}</span></pre>
+<p>Notice that the user input is out of our control. The best option for validating user input is to return an <kbd>Error</kbd> condition if the input is invalid.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

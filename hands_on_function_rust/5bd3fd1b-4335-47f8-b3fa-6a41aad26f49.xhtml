@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Translating requirements into a change map</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Translating requirements into a change map</h1>
+                </header>
+            
+            <article>
+                
+<p>Given the various new requirements, it seems appropriate to split the previous simulation code into different libraries and executables. We will create a separate module for each of the following:</p>
+<ul>
+<li>A physics simulator</li>
+<li>A motor control</li>
+<li>An executable to run the simulation for demonstration</li>
+<li>An executable to further analyze the simulation</li>
+</ul>
+<p>The physics simulator should accept a generic motor controller and a measurement accumulator. The measurement accumulator provided will accept readings of velocity, acceleration, and all other information available to the simulator. The motor controller provided will accept similar readings of velocity and so on, and produce an output of the desired voltage to motors. The resulting function will be responsible for accurately simulating the physical operation of any specified elevator and building.</p>
+<p>The motor control will couple with the simulator, or eventually the actual elevator, to use available information to decide how to operate the elevator.</p>
+<p>The simulation executable will wrap the physics simulator and motor control to create a program equivalent to the simulation from <a href="bf10aff4-ca84-44a7-a982-b156c9cde41e.xhtml" target="_blank">Chapter 2</a>, <em><span>Functional Control Flow</span></em>. Additionally, all recorded information from the simulation should be saved to a file for further detailed analysis.</p>
+<p>The analysis executable should accept the simulator trace file and check that all performance requirements have been met. Additionally, any analysis that would be useful for development purposes will be added here.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

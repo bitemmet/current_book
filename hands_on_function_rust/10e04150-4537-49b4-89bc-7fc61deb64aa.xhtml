@@ -1,0 +1,60 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing stubs for each program requirement</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing stubs for each program requirement</h1>
+                </header>
+            
+            <article>
+                
+<p>Program requirements are typically phrased as outcomes. What effects should this program have when you run it? Answering this question with code is often straightforward. Here is a list of steps to methodically transform project requirements into code:</p>
+<ol>
+<li>List all program requirements</li>
+<li>List dependencies or prerequisites for each requirement</li>
+<li>Create a dependency graph from the requirements and dependencies lists</li>
+<li>Write stubs that implement the dependency graph</li>
+</ol>
+<p>With practice, these steps can be combined into a single step of writing the stub code. However, if you become overwhelmed during the architecture phase of a project, then it may be helpful to go through these steps explicitly. This is a reliable method to break down complex problems into smaller problems:</p>
+<ol>
+<li>Firstly, to list all program requirements, from earlier consideration, we know that we need to store real-time data for location, velocity, and acceleration. The program should accept an input file or standard input describing the number of floors, floor height, and a list of floor requests to be processed. The output of the program should be real-time elevator location, velocity, and acceleration, with a summary, upon completion, of all transport requests. The summary should list average and standard deviation for location, velocity, and acceleration.</li>
+<li>Secondly, list dependencies or prerequisites for each requirement. The data seems to be atomic with no dependencies or prerequisites. The program flow seems to naturally take the form of a polling loop, updating real-time state information from sensors and issuing motion commands once per loop. There is a time-lagged circular dependency between elevator state and motion commands: motion commands are chosen based on state, and the next loop will realize the time-adjusted effect of those commands.</li>
+<li>Thirdly, c<span>reate a dependency graph from the requirements and dependencies lists with the following:</span>
+<ol>
+<li>Store the location, velocity, and acceleration state</li>
+<li>Store the motor input voltage</li>
+<li>Store the input building description and floor requests</li>
+<li>Parse the input and store as building description and floor requests</li>
+<li>Loop while there are remaining floor requests:
+<ol>
+<li>Update the location, velocity, and acceleration</li>
+<li>If the next floor request in the queue is satisfied, then remove it from the queue</li>
+<li>Adjust motor control to process the next floor request</li>
+<li>Print real-time statistics</li>
+</ol>
+</li>
+<li>Print the summary</li>
+</ol>
+</li>
+<li>Fourthly, write stubs that implement the dependency graph. We will update <kbd>src/main.rs</kbd> to implement this stub logic. Note that the variables, declared by <kbd>let</kbd> bindings, are stored inside the <kbd>main</kbd> function. The mutable state must be stored inside a function or a data structure. This is shown in the following code block:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">pub fn run_simulation()<br/>{<br/><br/></span><span class="s1">   //1. Store location, velocity, and acceleration state<br/></span><span class="s1">   let mut location: f64 = 0.0; // meters<br/></span><span class="s1">   let mut velocity: f64 = 0.0; // meters per second<br/></span><span class="s1">   let mut acceleration: f64 = 0.0; // meters per second squared<br/></span><span class="s1">   <br/>   //2. Store motor input voltage<br/></span><span class="s1">   let mut up_input_voltage: f64 = 0.0;<br/></span><span class="s1">   let mut down_input_voltage: f64 = 0.0;<br/><br/></span><span class="s1">   //3. Store input building description and floor requests<br/></span><span class="s1">   let mut floor_count: u64 = 0;<br/></span><span class="s1">   let mut floor_height: f64 = 0.0; // meters<br/></span><span class="s1">   let mut floor_requests: Vec&lt;u64&gt; = Vec::new();<br/><br/>   //4. </span>Parse input and store as building description and floor requests<span class="s1"><br/><br/></span><span class="s1">   //5. Loop while there are remaining floor requests<br/></span><span class="s1">   while floor_requests.len() &gt; 0<br/></span><span class="s1">   {<br/></span><span class="s1">      //5.1. Update location, velocity, and acceleration<br/><br/></span><span class="s1">      //5.2. If next floor request in queue is satisfied, then remove from queue<br/><br/></span><span class="s1">      //5.3. Adjust motor control to process next floor request<br/><br/></span><span class="s1">      //5.4. Print realtime statistics<br/></span><span class="s1">   }<br/><br/></span><span class="s1">   //6. Print summary<br/></span><span class="s1">   println!("summary");<br/></span><span class="s1">}<br/><br/>fn main()<br/>{<br/>   run_simulation()<br/>}</span></pre>
+<p>Alternatively, we could have written the loop as a separate function. The function would check the condition, and the function would potentially call itself again. When a function calls itself, this is called <strong>recursion</strong>. Recursion is an extremely common and important pattern in functional programming. However, this specific type of recursion, known as <strong>tail recursion</strong>, is not recommended in Rust currently (see RFC #271 (<a href="https://github.com/rust-lang/rfcs/issues/271">https://github.com/rust-lang/rfcs/issues/271</a>)—without this proposed optimization, the tail recursion may unnecessarily use extra stack space and run out of memory).</p>
+<p>The recursive loop code would become as follows:</p>
+<pre style="padding-left: 30px">fn process_floor_requests(...)<br/>{<br/>   if <span class="s1">floor_requests.len() == 0 { return; }</span><br/><br/>   //5.1 Update location, velocity, and acceleration<br/><br/>   //5.2 If next floor request in queue is satisfied, then remove from queue<br/><br/>   //5.3 Adjust motor control to process next floor request<br/><br/>   //5.4 Print realtime statistics<br/><br/>   //tail recursion<br/>   process_floor_requests(...)<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

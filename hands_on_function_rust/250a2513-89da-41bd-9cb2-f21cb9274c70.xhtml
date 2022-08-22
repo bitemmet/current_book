@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Investigating parametric polymorphism</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Investigating parametric polymorphism</h1>
+                </header>
+            
+            <article>
+                
+<p>Another common application of parameterization are for functions. For the same reasons that we would want to parameterize data structures or traits, we also should consider parameterization of functions. Parameterizing functions is called <strong>parametric polymorphism</strong>. Polymorphism is Greek for multiple forms or, sometimes in modern usage, it can mean multiple arrows. The word indicates that one function has multiple implementations or multiple ground type signatures.</p>
+<p>For a simple example of a parametric function, we can imagine a generic multiply by three function. Here is the implementation:</p>
+<pre class="p1"><span class="s1">fn raise_by_three&lt;T: Mul + Copy&gt;(x: T) -&gt; T<br/></span><span class="s1">where T: std::ops::Mul&lt;Output=T&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   x * x * x<br/></span><span class="s1">}</span></pre>
+<p>Here, the <kbd>raise_by_three</kbd> function does not know what <kbd>Mul</kbd> does. <kbd>Mul</kbd> is a trait and abstract behavior, which also specifies an associated type, <kbd>Output</kbd>. It is not possible to generically raise <kbd>x.pow(3)</kbd> here because <kbd>x</kbd> may not be a numerical type. At the very least, we do not know whether <kbd>x</kbd> is a floating type or an integral type. So instead, we use the available <kbd>Mul</kbd> trait to multiply <kbd>x</kbd> three times. This may seem like a strange thing to do, but the concept becomes clearer in context.</p>
+<p>First, consider the application in regard to floating and integral types. This usage is straightforward but does not seem very useful yet. We already have a working <kbd>raise by three</kbd> expression, as long as we know and have the original floating or integral type. So, why wouldn't we just use the built-in expression? First, let's just compare the two options in code:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">raise_by_three(10);<br/></span><span class="s1">(10 as u64).pow(3);<br/><br/></span><span class="s1">raise_by_three(3.0);<br/></span><span class="s1">(3.0 as f64).powi(3);</span></pre>
+<p>The second option seems much more preferable, and it is. However, the second option also assumes we know the full type of <kbd>u64</kbd> or <kbd>f64</kbd> for each argument. Let's look at what happens if we erase some type information:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">#[derive(Copy,Clone)]<br/>struct Raiseable&lt;T: Mul + Copy&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   x: T<br/></span><span class="s1">}<br/><br/></span><span class="s1">impl&lt;T: Mul + Copy&gt; std::ops::Mul for Raiseable&lt;T&gt;<br/></span><span class="s1">where T: std::ops::Mul&lt;Output=T&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   type Output = Raiseable&lt;T&gt;;<br/></span><span class="s1">   fn mul(self, rhs: Self) -&gt; Self::Output<br/></span><span class="s1">   {<br/></span><span class="s1">      Raiseable { x: self.x * rhs.x }<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">let x = Raiseable { x: 10 as u64 };<br/></span><span class="s1">raise_by_three(x);<br/></span><span class="s1">//no method named pow<br/></span><span class="s1">//x.pow(3);<br/></span></pre>
+<pre class="p1" style="padding-left: 30px"><span class="s1"><br/></span><span class="s1">let x = Raiseable { x: 3.0 as f64 };<br/></span><span class="s1">raise_by_three(x);<br/></span><span class="s1">//no method named powi<br/></span><span class="s1">//x.powi(3);</span><span class="s1"> </span></pre>
+<p>After we lose access to the underlying types, we are quickly restricted in regard to what operations we can perform. Generic programming is great in the respect that it can reduce work in the long term; however, it also requires very explicit declaration and implementation of all interfaces that are used. Here, you can see that we must declare <kbd>Copy</kbd> as a trait bound, meaning the ability to copy a variable from one memory location to another. Another low-level trait is <kbd>Sized</kbd>, which indicates that a datum has a known constant size at compile time.</p>
+<p>If we look at the <kbd>HashMap</kbd> declaration, we can see why this abstraction is often necessary:</p>
+<pre style="padding-left: 30px">impl&lt;K: Hash + Eq, V&gt; HashMap&lt;K, V, RandomState&gt;</pre>
+<p>Each hash key must implement <kbd>Hash</kbd> and <kbd>Eq</kbd>, meaning it must be hashable and comparable. Other than that, no traits are expected and thus the whole data structure remains very generic.</p>
+<p>Just as functions can be parameterized, functions as arguments can also be parameterized. There are two general forms of functions as parameters—closures and function pointers. Function pointers are not permitted to carry state. Closures can carry state but have a variable size which is independent of their declared type. Function pointers can be promoted to closures automatically:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">fn foo&lt;X&gt;(x: X) -&gt; X<br/></span><span class="s1">{<br/></span><span class="s1">   x<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn bar&lt;X&gt;(f: fn(X) -&gt; X, x: X) -&gt; X<br/></span><span class="s1">{<br/></span><span class="s1">   f(x)<br/></span><span class="s1">}<br/><br/>foo(1);<br/>bar(foo,1);</span></pre>
+<p class="mce-root"><span>Closures can also be parameterized in a similar fashion. This case is a bit more common. If you are wondering whether to use a function pointer or a closure, use the closure. Function pointers can always be promoted to closures. Also, this code introduces the <kbd>where</kbd> syntax; <kbd>where</kbd> clauses permit trait bounds to be declared in a more readable form. Here is the code:</span></p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">fn baz&lt;X,F&gt;(f: F, x: X) -&gt; X<br/></span><span class="s1">where F: Fn(X) -&gt; X<br/></span><span class="s1">{<br/></span><span class="s1">   f(x)<br/></span><span class="s1">}<br/><br/></span><span class="s1">baz(|x| x, 1);<br/></span><span class="s1">baz(foo, 1);</span></pre>
+<p>Here, we can see how easy it is to wrap a function pointer into a closure. Closures are a good abstraction and very powerful when used correctly.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Searching for abstractions</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Searching for abstractions</h1>
+                </header>
+            
+            <article>
+                
+<p>After writing a code draft, it is a good practice to read through the code again and look for possible improvements.  When reviewing a project, look specifically for ugly code, anti-patterns, and unchecked assumptions. After review, we find the code does not need correcting.</p>
+<p>We should, however, point out one functional abstraction that was used that reduced line count significantly, which is the use of iterators. In calculating our variable summaries, we always used iterators to calculate sums and statistics. Some of the operators have not been introduced, so let's look closer:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">let N = data.len();<br/></span><span class="s1">let sum: f64 = data.iter().sum();</span><span class="s1"><br/></span><span class="s1">let avg = sum / (N as f64);<br/></span><span class="s1">let dev = (<br/></span><span class="s1">   data.clone().into_iter()<br/></span><span class="s1">   .map(|v| (v - avg).powi(2))<br/></span><span class="s1">   .fold(0.0, |a, b| a+b)<br/></span><span class="s1">   / (N as f64)<br/></span><span class="s1">).sqrt();<br/></span></pre>
+<p>Here, there are two important iterator methods being used—<kbd>map</kbd> and <kbd>fold</kbd>. <kbd>map</kbd> accept a mapping function and return an iterator of the modified values. The <kbd>fold</kbd> method holds an accumulator value (argument 1), and, for each element in the iterator, applies the accumulator function (argument 2), returning the accumulated value as a result. The <kbd>fold</kbd> function consumes the iterator when called.</p>
+<p>An iterator is defined by a trait with a <kbd>next</kbd> method, which may return the next item in the sequence. A simple infinite list could be defined as follows:</p>
+<pre style="padding-left: 30px">struct Fibonacci<br/>{<br/> curr: u32,<br/> next: u32,<br/>}<br/><br/>impl Iterator for Fibonacci<br/>{<br/>   type Item = u32;<br/>   fn next(&amp;mut self) -&gt; Option&lt;u32&gt;<br/>   {<br/>      let new_next = self.curr + self.next;<br/>      self.curr = self.next;<br/>      self.next = new_next;<br/>      Some(self.curr) //infinite list, never None<br/>   }<br/>}<br/><br/>fn fibonacci() -&gt; Fibonacci<br/>{<br/>   Fibonacci { curr: 1, next: 1 }<br/>}</pre>
+<p>These objects define an iterator. The <kbd>map</kbd> function and other stream modifiers simply wrap the input stream inside of another iterator that applies the modifier.</p>
+<p>Alternatively, the statistics calculation could have been defined with <kbd>for</kbd> loops. The result would look like the following:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">let N = data.len();<br/></span><span class="s1">let mut sum = 0.0;<br/></span><span class="s1">for di in 0..data.len()<br/></span><span class="s1">{<br/></span><span class="s1">   sum += data[di];<br/></span><span class="s1">}<br/></span><span class="s1">let avg = sum / (N as f64);<br/></span><span class="s1">let mut dev = 0.0;<br/></span><span class="s1">for di in 0..data.len()<br/></span><span class="s1">{<br/></span><span class="s1">   dev += (data[di] - avg).powi(2);<br/></span><span class="s1">}<br/></span><span class="s1">dev = (dev / (N as f64)).sqrt();</span></pre>
+<p>By comparison, we can see that the functional code is a little bit shorter. More importantly, the functional code is<span> </span>declarative. When code only describes requirements, we call that code <strong>declarative</strong>. When code describes machine instructions to satisfy requirements, we call that code <strong>imperative</strong>. The primary benefits of declarative style over imperative style are that declarative style is self-documenting and prevents mistakes by making them more obvious.</p>
+<p>For these reasons, when searching for abstractions, we encourage looking at <kbd>for</kbd> loops. In most cases, <kbd>for</kbd> loops can be messy or otherwise undesirable. Iterators and combinators may be a good solution to help improve code quality.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

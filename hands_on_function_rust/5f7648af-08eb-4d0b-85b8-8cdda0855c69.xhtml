@@ -1,0 +1,34 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Authorizing sessions</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Authorizing sessions</h1>
+                </header>
+            
+            <article>
+                
+<p>To authorize a session, there are three steps:</p>
+<ol>
+<li>Authorize the session</li>
+<li>Poll and retrieve the session object</li>
+<li>Check for errors</li>
+</ol>
+<p>The results of these functions are <kbd>Result</kbd> objects, which will be a common pattern in this library:</p>
+<pre>pub fn authorize_override() -&gt; Result&lt;AuthorizedSession,ErrorCode&gt;<br/>{<br/>   let session = unsafe {<br/>      magic::issue_override_code(OverrideCode::IssueOverride as i32);<br/>      magic::poll_override_session()<br/>   };<br/>   let session = AuthorizedSession {<br/>      session: session<br/>   };<br/>   check_error(session)<br/>}<br/><br/>pub fn authorize_privileged() -&gt; Result&lt;AuthorizedSession,ErrorCode&gt;<br/>{ ... }<br/><br/>pub fn authorize_admin() -&gt; Result&lt;AuthorizedSession,ErrorCode&gt;<br/>{ ... }</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

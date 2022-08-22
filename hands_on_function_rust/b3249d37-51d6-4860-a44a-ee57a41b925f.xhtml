@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>For a code rarely executed, performance is not affected</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">For a code rarely executed, performance is not affected</h1>
+                </header>
+            
+            <article>
+                
+<p><span>It is very common that you will initialize some resource and use it multiple times. Optimizing</span> <kbd>initialization</kbd><span> of resources may be misdirected. You should consider focusing on improving the work efficiency. This is done as follows:</span></p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::{thread,time};<br/></span><span class="s1"><br/>fn initialization() {<br/></span><span class="s1">   let t = time::Duration::from_millis(15000);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn work() {<br/></span><span class="s1">   let t = time::Duration::from_millis(15000);<br/></span><span class="s1">   loop {<br/></span><span class="s1">      thread::sleep(t);<br/></span><span class="s1">      println!("Work.");<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   initialization();<br/></span><span class="s1">   println!("Done initializing, start work.");<br/></span><span class="s1">   work();<br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

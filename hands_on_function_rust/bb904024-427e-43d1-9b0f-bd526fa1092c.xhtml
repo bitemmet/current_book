@@ -1,0 +1,85 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Iterators</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Iterators</h1>
+                </header>
+            
+            <article>
+                
+<p class="p2"><span class="s1">Iterators are a common feature of OOP languages, and Rust supports this concept well. Rust iterators are also designed with functional programming in mind, allowing programmers to write more legible code. The specific concept emphasized here is <strong>composability</strong>. When iterators can be manipulated, transformed, and combined, the mess of <kbd>for</kbd> loops can be replaced by individual function calls. These examples can be found in the <kbd>intro_iterators.rs</kbd> file. This is depicted in the following table:</span></p>
+<table border="1" style="border-collapse: collapse;width: 100%">
+<tbody>
+<tr>
+<td><strong>Function name with description</strong></td>
+<td><strong>Example</strong></td>
+</tr>
+<tr>
+<td>Chain concatenates<span> t</span>wo itera<span>tors: <kbd>first...second</kbd></span></td>
+<td>
+<p><kbd>(0..10).chain(10..20);</kbd></p>
+</td>
+</tr>
+<tr>
+<td>The <kbd>zip</kbd><span> function combines two iterators into tuple</span> pairs, iterating until the end of the shortest iterator: <span>(a1,b1), (a2, b2), ...</span></td>
+<td>
+<p><kbd>(0..10).zip(10..20);</kbd></p>
+</td>
+</tr>
+<tr>
+<td>The <kbd>enumerate</kbd><span> function is a special case of </span><kbd>zip</kbd><span> that creates numbered tuples (0, a1),(1,a2), …</span></td>
+<td>
+<p class="p3" style="padding-left: 30px"><kbd><span class="s2">(0..10).enumerate();</span></kbd></p>
+</td>
+</tr>
+<tr>
+<td>The <kbd>inspect</kbd><span> function applies a function to all values in the iterator during iteration</span></td>
+<td>
+<p class="p3" style="padding-left: 30px"><kbd><span class="s2">(0..10).inspect(|x|{ println!("value {}", *x) });</span></kbd></p>
+</td>
+</tr>
+<tr>
+<td>The <kbd>map</kbd><span> function applies a function to each element, returning the result in place</span></td>
+<td>
+<p class="p3" style="padding-left: 30px"><kbd><span class="s2">(0..10).map(|x| x*x);</span></kbd></p>
+</td>
+</tr>
+<tr>
+<td>The <kbd>filter</kbd><span> function restricts elements to those satisfying a predicate</span></td>
+<td>
+<p class="p3" style="padding-left: 30px"><kbd><span class="s2">(0..10).filter(|x| *x&lt;3);</span></kbd></p>
+</td>
+</tr>
+<tr>
+<td>The <kbd>fold</kbd><span> function accumulates all values into a single result</span></td>
+<td>
+<p class="p3" style="padding-left: 30px"><kbd><span class="s2">(0..10).fold(0, |x,y| x+y);</span></kbd></p>
+</td>
+</tr>
+<tr>
+<td><span class="s1">When you want to apply the iterator, you can use a<span> </span><kbd>for</kbd><span> </span>loop or call<span> </span><kbd>collect</kbd></span></td>
+<td>
+<p><kbd>for i in (0..10) {}</kbd><br/>
+<br/>
+<kbd>(0..10).collect::&lt;Vec&lt;u64&gt;&gt;();</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

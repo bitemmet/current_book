@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Checking errors and resetting state</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Checking errors and resetting state</h1>
+                </header>
+            
+            <article>
+                
+<p>There are two simple utility functions available that reset state and check for errors. The code wraps the FFI functions in unsafe blocks and converts errors into <kbd>Result</kbd> values. The code is as follows:</p>
+<pre>pub fn reset_state()<br/>{<br/>   unsafe {<br/>      magic::override_reset_state();<br/>   }<br/>}<br/><br/>pub fn check_error&lt;T&gt;(t: T) -&gt; Result&lt;T,ErrorCode&gt;<br/>{<br/>   let err = unsafe {<br/>      magic::poll_override_error()<br/>   };<br/>   if err==0 {<br/>      Result::Ok(t)<br/>   } else {<br/>      Result::Err(toErrorCode(err))<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

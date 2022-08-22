@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the data_recorders.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the data_recorders.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>To separate responsibilities and not let individual modules get too big, we should move the data recorder implementation out of the simulation and into its own module. The result is as follows:</p>
+<ol>
+<li>Define the <kbd>DataRecorder</kbd> trait:</li>
+</ol>
+<pre style="padding-left: 30px"><span>pub trait DataRecorder<br/>{<br/>   fn init(&amp;mut self, esp: Box&lt;Building&gt;, est: ElevatorState);<br/>   fn record(&amp;mut self, est: ElevatorState, dst: u64);<br/>   fn summary(&amp;mut self);<br/>}<br/></span></pre>
+<ol start="2">
+<li>Define the <kbd>SimpleDataRecorder</kbd> struct:</li>
+</ol>
+<pre style="padding-left: 30px"><span>struct SimpleDataRecorder&lt;W: Write&gt;<br/>{<br/>   esp: Box&lt;Building&gt;,<br/>   termwidth: u64,<br/>   termheight: u64,<br/>   stdout: raw::RawTerminal&lt;W&gt;,<br/>   log: File,<br/>   record_location: Vec&lt;f64&gt;,<br/>   record_velocity: Vec&lt;f64&gt;,<br/>   record_acceleration: Vec&lt;f64&gt;,<br/>   record_force: Vec&lt;f64&gt;,<br/>}</span></pre>
+<ol start="3">
+<li>Define the <kbd>SimpleDataRecorder</kbd> constructor:</li>
+</ol>
+<pre style="padding-left: 30px"><span>pub fn newSimpleDataRecorder(esp: Box&lt;Building&gt;) -&gt; Box&lt;DataRecorder&gt;<br/>{<br/>   let termsize = termion::terminal_size().ok();<br/>   Box::new(SimpleDataRecorder {<br/>      esp: esp.clone(),<br/>      termwidth: termsize.map(|(w,_)| w-2).expect("termwidth") as u64,<br/>      termheight: termsize.map(|(_,h)| h-2).expect("termheight") as u64,<br/>      stdout: io::stdout().into_raw_mode().unwrap(),<br/>      log: File::create("simulation.log").expect("log file"),<br/>      record_location: Vec::new(),<br/>      record_velocity: Vec::new(),<br/>      record_acceleration: Vec::new(),<br/>      record_force: Vec::new()<br/>   })<br/>}</span></pre>
+<ol start="4">
+<li>Define the <kbd>SimpleDataRecorder</kbd> implementation of the <kbd>DataRecorder</kbd> trait:</li>
+</ol>
+<pre style="padding-left: 30px"><span>impl&lt;W: Write&gt; DataRecorder for SimpleDataRecorder&lt;W&gt;<br/>{<br/>   fn init(&amp;mut self, esp: Box&lt;Building&gt;, est: ElevatorState)<br/>   {<br/>      ...<br/>   }<br/></span><span class="s1">   fn record(&amp;mut self, est: ElevatorState, dst: u64)<br/>      ...<br/></span><span>   }<br/>   fn summary(&amp;mut self)<br/>   {<br/>      ...<br/>   }<br/>}</span></pre>
+<ol start="5">
+<li>Define the miscellaneous helper functions:</li>
+</ol>
+<pre style="padding-left: 30px"><span>fn variable_summary&lt;W: Write&gt;(stdout: &amp;mut raw::RawTerminal&lt;W&gt;, vname: String, data: &amp;Vec&lt;f64&gt;) {<br/>   let (avg, dev) = variable_summary_stats(data);<br/>   variable_summary_print(stdout, vname, avg, dev);<br/>}<br/><br/>fn variable_summary_stats(data: &amp;Vec&lt;f64&gt;) -&gt; (f64, f64)<br/>{<br/>   //calculate statistics<br/>   let N = data.len();<br/>   </span><span class="s1">let sum = data.iter().sum::&lt;f64&gt;();</span><span><br/>   let avg = sum / (N as f64);</span><span><br/>   let dev = (<br/>       data.clone().into_iter()<br/>       .map(|v| (v - avg).powi(2))<br/></span><span class="s1">       .sum::&lt;f64&gt;()</span><span><br/>       / (N as f64)<br/>   ).sqrt();<br/>   (avg, dev)<br/>}</span><span><br/><br/>fn variable_summary_print&lt;W: Write&gt;(stdout: &amp;mut raw::RawTerminal&lt;W&gt;, vname: String, avg: f64, dev: f64)<br/>{<br/>   //print formatted output<br/>   writeln!(stdout, "Average of {:25}{:.6}", vname, avg);<br/>   writeln!(stdout, "Standard deviation of {:14}{:.6}", vname, dev);<br/>   writeln!(stdout, "");<br/>}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

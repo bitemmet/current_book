@@ -1,0 +1,51 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the simulate_trip.rs executable</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the simulate_trip.rs executable</h1>
+                </header>
+            
+            <article>
+                
+<p>The simulate trip changes quite a bit because the <kbd>DataRecorder</kbd> logic has been removed. The initialization of the simulation is also very different from before. The end result is as follows:</p>
+<ol>
+<li>Initialize <kbd>ElevatorState</kbd>:</li>
+</ol>
+<pre class="mce-root" style="padding-left: 30px"><span>//1. Store location, velocity, and acceleration state</span><br/><span>//2. Store motor input target force</span><br/><span>let mut est = ElevatorState {</span><br/><span>   timestamp: 0.0,</span><br/><span>   location: 0.0,</span><br/><span>   velocity: 0.0,</span><br/><span>   acceleration: 0.0,</span><br/><span>   motor_input: 0.0</span><br/><span>};</span></pre>
+<ol start="2">
+<li>Initialize the building description and floor requests:</li>
+</ol>
+<pre style="padding-left: 30px"><span>//3. Store input building description and floor requests</span><br/><span>let mut esp: Box&lt;Building&gt; = Box::new(Building1);</span><br/><span>let mut floor_requests: Box&lt;RequestQueue&gt; = Box::new(FloorRequests {</span><br/><span>   requests: Vec::new()</span><br/><span>});</span></pre>
+<ol start="3">
+<li>Parse the input and store it as building description and floor requests:</li>
+</ol>
+<pre class="p1" style="padding-left: 30px"><span class="s1">//4. Parse input and store as building description and floor requests<br/></span><span class="s1">match env::args().nth(1) {<br/></span><span class="s1">   Some(ref fp) if *fp == "-".to_string()<span class="Apple-converted-space">  </span>=&gt; {<br/>      ...<br/></span><span class="s1">   },<br/></span><span class="s1">   None =&gt; {<br/>      ...<br/>   },<br/></span><span class="s1">   Some(fp) =&gt; {<br/>      ...<br/>   }<br/>}</span></pre>
+<ol start="4">
+<li>Initialize the data recorder and motion controller:</li>
+</ol>
+<pre style="padding-left: 30px"><span>let mut dr: Box&lt;DataRecorder&gt; = newSimpleDataRecorder(esp.clone());</span><br/><span>let mut mc: Box&lt;MotionController&gt; = Box::new(SmoothMotionController {</span><br/><span>  timestamp: 0.0,</span><br/><span>  esp: esp.clone()</span><br/><span>});</span></pre>
+<ol start="5">
+<li>Run the elevator simulation:</li>
+</ol>
+<pre class="mce-root" style="padding-left: 30px"><span>simulate_elevator(esp, est, &amp;mut floor_requests, &amp;mut mc, &amp;mut dr);</span></pre>
+<ol start="6">
+<li>Print the simulation summary:</li>
+</ol>
+<pre style="padding-left: 30px">dr.summary();</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>If the next floor request in the queue is satisfied, then remove it from the queue</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">If the next floor request in the queue is satisfied, then remove it from the queue</h1>
+                </header>
+            
+            <article>
+                
+<p>To complete a floor request, we must be at the destination floor and stopped. We assume that a sufficiently low velocity can be stopped with some sort of brake. This will hold us in place steadily until passengers depart or enter the elevator. The code is as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">let next_floor = floor_requests[0];<br/></span><span class="s1">if (location - (next_floor as f64)*floor_height).abs() &lt; 0.01<br/>   &amp;&amp; </span><span class="s1">velocity.abs() &lt; 0.01<br/></span><span class="s1">{<br/></span><span class="s1">   velocity = 0.0;<br/></span>   floor_requests.remove(0);<span class="s1"><br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

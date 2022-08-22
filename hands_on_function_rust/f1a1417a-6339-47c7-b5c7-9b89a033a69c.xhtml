@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the motor_controllers.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the motor_controllers.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The new <kbd>motor_controller</kbd> module serves as an adapter to all of the linked motor drivers and their interfaces, and provides a single uniform interface. Let's see how:</p>
+<ol>
+<li>First, let's link all the drivers from the software provided into our program:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">use libc::c_int;<br/><br/></span><span class="s1">#[link(name = "motor1")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn motor1_adjust_motor(target_force: c_int) -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">#[link(name = "motor2")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn motor2_adjust_motor(target_force: c_int) -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">#[link(name = "motor3")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn motor3_adjust_motor(target_force: c_int) -&gt; c_int;<br/></span><span class="s1">}</span></pre>
+<p style="padding-left: 60px">This section tells our program to link to statically compiled libraries named something like <kbd>libmotor1.a</kbd>, <kbd>libmotor2.a</kbd>, and <kbd>libmotor3.a</kbd>. Our example chapter also contains the source and build script for these libraries, so you can inspect each one. In a full project, there are many ways to link to an external binary library, this being only one of many options.</p>
+<ol start="2">
+<li>Next, we should make a trait for <kbd>MotorInput</kbd> and a generic <kbd>MotorDriver</kbd> interface, including implementations for each motor. The code is as follows:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub enum MotorInput<br/></span><span class="s1">{<br/></span><span class="s1">   Motor1 { target_force: f64 },<br/></span><span class="s1">   Motor2 { target_force: f64 },<br/></span><span class="s1">   Motor3 { target_force: f64 },<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub trait MotorDriver<br/></span><span class="s1">{<br/></span><span class="s1">   fn adjust_motor(&amp;self, input: MotorInput);<br/></span><span class="s1">}<br/><br/></span><span class="s1">struct Motor1;<br/></span><span class="s1">impl MotorDriver for Motor1 { ... }<br/><br/></span><span class="s1">//Motor 2<br/><br/></span><span class="s1">//Motor 3</span></pre>
+<ol start="3">
+<li>Next, we should implement the motor controller trait and implementations. The motor controller should wrap motor information and drivers into a uniform interface. The <kbd>MotorDriver</kbd> and <kbd>MotorController</kbd> trait here are coerced into a simple upward/downward force model. Therefore, the relation between driver and controller is one-to-one and cannot be completely abstracted into a common trait. The code for it is as follows:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">pub trait MotorController<br/></span><span class="s1">{<br/></span><span class="s1">   fn adjust_motor(&amp;self, f: f64);<br/></span><span class="s1">   fn max_force(&amp;self) -&gt; f64;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub struct MotorController1<br/></span><span class="s1">{<br/></span><span class="s1">   motor: Motor1<br/></span><span class="s1">}<br/><br/></span><span class="s1">impl MotorController for MotorController1 { ... }<br/><br/></span>//Motor Controller 2 ...<br/><br/>//Motor Controller 3 ...</pre>
+<p>The entire code for these is present in the GitHub repository at: <a href="https://github.com/PacktPublishing/Hands-On-Functional-Programming-in-RUST">https://github.com/PacktPublishing/Hands-On-Functional-Programming-in-RUST</a>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

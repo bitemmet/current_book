@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Issuing privileged commands</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Issuing privileged commands</h1>
+                </header>
+            
+            <article>
+                
+<p>Privileged commands will be allowed if there is an active authorized session:</p>
+<pre>#[test]<br/>fn input_floor() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(3);<br/>      magic::override_input_floor(2);<br/>      assert!(magic::poll_override_code() == 4);<br/>      assert!(magic::poll_override_code() == 2);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}<br/><br/>#[test]<br/>fn manual_mode() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(3);<br/>      magic::override_manual_mode();<br/>      assert!(magic::poll_override_code() == 5);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}<br/><br/>#[test]<br/>fn normal_mode() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(3);<br/>      magic::override_normal_mode();<br/>      assert!(magic::poll_override_code() == 6);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

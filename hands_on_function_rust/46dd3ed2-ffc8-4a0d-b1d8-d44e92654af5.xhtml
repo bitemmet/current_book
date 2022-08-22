@@ -1,0 +1,54 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Code Organization and Application Architecture</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Code Organization and Application Architecture</h1>
+                </header>
+            
+            <article>
+                
+<ol>
+<li>What are four ways of grouping code into modules?</li>
+</ol>
+<p style="padding-left: 60px">Our workshop model has four ways of grouping code together: by type, by purpose, by layer, and by convenience.</p>
+<ol start="2">
+<li>What does FFI stand for?</li>
+</ol>
+<p style="padding-left: 60px">FFI stands for Foreign Function Interface.</p>
+<ol start="3">
+<li>Why are unsafe blocks necessary?</li>
+</ol>
+<p style="padding-left: 60px">The <kbd>unsafe</kbd> syntax in Rust indicates that you want to use superpowers and that you accept the responsibility.</p>
+<ol start="4">
+<li>Is it ever safe to use unsafe blocks?</li>
+</ol>
+<p style="padding-left: 60px">Nothing is safe. There is an ongoing effort by core Rust developers to rewrite standard library code to use fewer unsafe features. Still, depending on how far down you look, there is no absolute safety in any context. For example, the core compiler is just assumed to always be logically consistent with regards to safety checks (hopefully it is).</p>
+<ol start="5">
+<li>What is the difference between a <kbd>libc::c_int</kbd> and an <kbd>i32</kbd>?</li>
+</ol>
+<p style="padding-left: 60px"><kbd>c_int</kbd> is a direct alias—<kbd>type c_int = i32;</kbd>.</p>
+<ol start="6">
+<li>Can linked libraries define functions with the same name?</li>
+</ol>
+<p style="padding-left: 60px">C++ uses something called name mangling to export symbols with the same name. However, Rust does not currently recognize this format with <kbd>extern</kbd>.</p>
+<ol start="7">
+<li>What type of files can be linked into a Rust project?</li>
+</ol>
+<p style="padding-left: 60px">Linked libraries can be of the form <kbd>name.a</kbd><span><em>,</em> <kbd>name.lib</kbd>, <kbd>name.so</kbd>, <kbd>name.dylib</kbd>, <kbd>name.dll</kbd>, or <kbd>name.rlib</kbd>, each with their own format.</span></p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

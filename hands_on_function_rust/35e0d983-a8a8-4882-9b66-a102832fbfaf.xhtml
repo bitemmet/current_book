@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Compact legible expressions</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Compact legible expressions</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">In functional languages, all terms are expressions. There are no statements in function bodies, only a single expression. All control flow operators are then formulated as expressions with a return value. In Rust, this is almost the case; the only non-expressions are <kbd>let</kbd> statements and item declarations.</span></p>
+<p class="p1"><span class="s1">Both of these statements can be wrapped in blocks to create an expression along with any other term. An example for this is the following, in <kbd>intro_expressions.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">let x = {<br/>    fn f(x: u32) -&gt; u32 {<br/>        x * x<br/>    }<br/>    let y = f(5);<br/>    y * 3<br/>};</pre>
+<p class="p1"><span class="s1">This nested format is uncommon in the wild, but it illustrates the permissive nature of Rust grammar.</span></p>
+<p class="p1"><span class="s1">Returning to the concept of functional style expressions, the emphasis should always be on writing legible literate code without much hassle or bloat. When someone else, or you at a later time, comes to read your code, it should be immediately understandable. Ideally, the  code should document itself. If you find yourself constantly writing code twice, once in code and again as comments, then you should reconsider how effective your programming practices really are.</span></p>
+<p class="p1"><span class="s1">To start with some examples of functional expressions, let's look at an expression that exists in most languages, the ternary conditional operator. In a normal <kbd>if</kbd> statement, the condition must occupy its own line and thus cannot be used as a sub-expression.</span></p>
+<p>The following is a traditional <kbd>if</kbd> statement, initializing a variable in <kbd>intro_expressions.rs</kbd>:</p>
+<pre class="p2" style="padding-left: 30px"><span class="s2">let x;<br/>if true {<br/>    x = 1;<br/>} else {<br/>    x = 2;<br/>}</span></pre>
+<p class="p1"><span class="s1">With the ternary operator, this assignment can be moved to a single line, shown as follows in <kbd>intro_expressions.rs</kbd>:</span></p>
+<pre class="p2" style="padding-left: 30px"><span class="s2">let x = if true { 1 } else { 2 };</span></pre>
+<p class="p1"><span class="s1"><span>Almost</span> every statement from OOP in Rust is also an expression—<kbd>if</kbd>, <kbd>for</kbd>, <kbd>while</kbd>, and so on. One of the more unique expressions to see in Rust that is uncommon in OOP languages is direct constructor expressions. All Rust types can be instantiated by single expressions. Constructors are only necessary in specific cases, for example, when an internal field requires complex initialization. The following is a simple <kbd>struct</kbd> and an equivalent tuple in <kbd>intro_expressions.rs</kbd>:</span></p>
+<pre class="p2" style="padding-left: 30px"><span class="s2">struct MyStruct<br/>{<br/>    a: u32,<br/>    b: f32,<br/>    c: String<br/>}<br/><br/>fn main()<br/>{<br/>    MyStruct {<br/>        a: 1,<br/>        b: 1.0,<br/>        c: "".to_string()<br/>    };<br/><br/><span>    (1, 1.0, "".to_string());<br/>}</span></span></pre>
+<p class="p1"><span class="s1">Another distinctive expression from functional languages is pattern matching. Pattern matching can be thought of as a more powerful version of a <kbd>switch</kbd> statement. Any expression can be sent into a pattern expression and</span> de-structured <span class="s1">to bind internal information into local variables before executing a <kbd>branch</kbd> expression. Pattern expressions are uniquely suited for working with enums. The two make a perfect pair.</span></p>
+<p>The following snippet defines a <kbd>Term</kbd> as a tagged union of expression options. In the main function, a <kbd>Term</kbd> <kbd>t</kbd> is constructed, then matched with a pattern expression. Note the syntax similarity between the definition of a tagged union and the matching inside of a pattern expression in <kbd>intro_expressions.rs</kbd>:</p>
+<pre class="p2" style="padding-left: 30px"><span class="s2">enum Term<br/>{<br/>    TermVal { value: String },<br/>    TermVar { symbol: String },<br/>    TermApp { f: Box&lt;Term&gt;, x: Box&lt;Term&gt; },<br/>    TermAbs { arg: String, body: Box&lt;Term&gt; }<br/>}<br/><br/>fn main()<br/>{<br/>    let mut t = Term::TermVar {<br/>        symbol: "".to_string()<br/>    };<br/>    match t {<br/>        Term::<span>TermVal { value: v1 } =&gt; v1,<br/>        Term::TermVar { symbol: v1 } =&gt; v1,<br/>        Term::TermApp { f: ref v1, x: ref v2 } =&gt;<br/>            "TermApp(?,?)".to_string(),<br/>        Term::TermAbs { arg: ref mut v1, body: ref mut v2 } =&gt;  <br/>            "TermAbs(?,?)".to_string()<br/>    };<br/>}</span></span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

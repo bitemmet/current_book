@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Unprivileged commands</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Unprivileged commands</h1>
+                </header>
+            
+            <article>
+                
+<p>Unprivileged commands should be allowed regardless of authentication:</p>
+<pre>#[test]<br/>fn flash() {<br/>   admin::reset_state();<br/>   assert!(!admin::is_override());<br/>   assert!(!admin::is_privileged());<br/>   assert!(!admin::is_admin());<br/>   admin::flash(222).ok();<br/>   assert!(admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn toggle_light() {<br/>   admin::reset_state();<br/>   assert!(!admin::is_override());<br/>   assert!(!admin::is_privileged());<br/>   assert!(!admin::is_admin());<br/>   admin::toggle_light(7).ok();<br/>   assert!(admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn set_light_color() {<br/>   admin::reset_state();<br/>   assert!(!admin::is_override());<br/>   assert!(!admin::is_privileged());<br/>   assert!(!admin::is_admin());<br/>   admin::set_light_color(33, 123).ok();<br/>   assert!(admin::check_error(()).is_ok());<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

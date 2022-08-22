@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Defining the AuthorizedSession struct and deconstructor</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Defining the AuthorizedSession struct and deconstructor</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>AuthorizedSession</kbd> struct wraps a session pointer from the library. This struct also implements the <kbd>Drop</kbd> trait, which is called when the object goes out of scope. The <kbd>free_override_session</kbd> call here is very important and should be noted as a potential source of problems:</p>
+<pre>#[derive(Clone)]<br/>pub struct AuthorizedSession<br/>{<br/>   session: *const c_void<br/>}<br/><br/>impl Drop for AuthorizedSession {<br/>   fn drop(&amp;mut self) {<br/>      unsafe {<br/>         magic::free_override_session(self.session);<br/>      }<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

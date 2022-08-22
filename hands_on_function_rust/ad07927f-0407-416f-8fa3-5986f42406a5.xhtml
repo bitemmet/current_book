@@ -1,0 +1,31 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Mixing object-oriented programming and functional programming</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Mixing object-oriented programming and functional programming</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">As mentioned before, Rust supports much of both object-oriented and functional programming styles. Datatypes and functions are neutral to either paradigm. Traits specifically support a hybrid blend of both styles.</span></p>
+<p class="p1"><span class="s1">First, in an object-oriented style, defining a simple class with a constructor and some methods can be accomplished with a <kbd>struct</kbd>, <kbd>trait</kbd>, and <kbd>impl</kbd>. This is explained using the following code snippet, in <kbd>intro_mixoopfp.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">struct MyObject<br/>{<br/>    a: u32,<br/>    b: f32,<br/>    c: String<br/>}<br/><br/>trait MyObjectTrait<br/>{<br/>    fn new(a: u32, b: f32, c: String) -&gt; Self;<br/>    fn get_a(&amp;self) -&gt; u32;<br/>    fn get_b(&amp;self) -&gt; f32;<br/>    fn get_c(&amp;self) -&gt; String;<br/>}<br/><br/>impl MyObjectTrait for MyObject<br/>{<br/>    fn new(a: u32, b: f32, c: String) -&gt; Self<br/>    {<br/>        MyObject { a:a, b:b, c:c }<br/>    }<br/><br/>    fn get_a(&amp;self) -&gt; u32<br/>    {<br/>        self.a<br/>    }<br/><br/>    fn get_b(&amp;self) -&gt; f32<br/>    {<br/>        self.b<br/>    }<br/><br/>    fn get_c(&amp;self) -&gt; String<br/>    {<br/>        self.c.clone()<br/>    }<br/>}</pre>
+<p class="p1"><span class="s1">Adding support for functional programming onto an object is as simple as defining traits and methods that use functional language features. For example, accepting a closure can become a great abstraction when used appropriately. Consider the following example, in <kbd>intro_mixoopfp.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">trait MyObjectApply<br/>{<br/>    fn apply&lt;F,R&gt;(&amp;self, f:F) -&gt; R<br/>    where F: Fn(u32,f32,String) -&gt; R;<br/>}<br/><br/>impl MyObjectApply for MyObject<br/>{<br/>    fn apply&lt;F,R&gt;(&amp;self, f:F) -&gt; R<br/>    where F: Fn(u32,f32,String) -&gt; R<br/>    {<br/>        f(self.a, self.b, self.c.clone())<br/>    }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

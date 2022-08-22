@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Measuring first, to optimize it</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Measuring first, to optimize it</h1>
+                </header>
+            
+            <article>
+                
+<p>There are a lot of options for profiling. Here are some that we recommend.</p>
+<p>The <kbd>flame</kbd> crate is one option to manually profile an application. Here we create the nested procedures <kbd>a</kbd>, <kbd>b</kbd>, and <kbd>c</kbd>. Each function creates a profiling context corresponding do that method. After running the profiler we will see proportionally how much time was spent for each call to each function.</p>
+<p>Starting with function <kbd>a</kbd>, this procedure creates a new profiling context, sleeps for one second, then calls <kbd>b</kbd> three times:</p>
+<pre class="p1"><span class="s1">extern crate flame;<br/></span><span class="s1">use std::fs::File;<br/></span><span class="s1">use std::{thread,time};<br/><br/></span><span class="s1">fn a() {<br/></span><span class="s1">   flame::start("fn a");<br/></span><span class="s1">   let t = time::Duration::from_millis(1000);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   b();<br/></span><span class="s1">   b();<br/></span><span class="s1">   b();<br/></span><span class="s1">   flame::end("fn a");<br/></span><span class="s1">}</span></pre>
+<p>Function <kbd>b</kbd> is nearly identical to <kbd>a</kbd>, and further calls into function <kbd>c</kbd>:</p>
+<pre class="p1"><span class="s1">fn b() {<br/></span><span class="s1">   flame::start("fn b");<br/></span><span class="s1">   let t = time::Duration::from_millis(1000);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   c();<br/></span><span class="s1">   c();<br/></span><span class="s1">   c();<br/></span><span class="s1">   flame::end("fn b");<br/></span><span class="s1">}</span></pre>
+<p>Function <kbd>c</kbd> profiles itself and sleeps, but does not call any further nested function:</p>
+<pre class="p1"><span class="s1">fn c() {<br/></span><span class="s1">   flame::start("fn c");<br/></span><span class="s1">   let t = time::Duration::from_millis(1000);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   flame::end("fn c");<br/></span><span class="s1">}</span></pre>
+<p>The <kbd>main</kbd> entrypoint sets up the flame graph library and calls a three times, then saves the flamegraph to a file:</p>
+<pre class="p1"><span class="s1">fn main() {<br/></span><span class="s1">   flame::start("fn main");<br/></span><span class="s1">   let t = time::Duration::from_millis(1000);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   a();<br/></span><span class="s1">   a();<br/></span><span class="s1">   a();<br/></span><span class="s1">   flame::end("fn main");<br/></span><span class="s1">   flame::dump_html(&amp;mut File::create("flame-graph.html").unwrap()).unwrap();<br/></span><span class="s1">}</span></pre>
+<p>After running this program, the <kbd>flame-graph.html</kbd> file will contain a visualization of what program sections took what percentage of resources. The <kbd>flame</kbd> crate is easy to install, requires some manual code manipulation, but produces a cool-looking graph.</p>
+<p><kbd>cargo profiler</kbd> is a tool that extends <kbd>cargo</kbd> to do performance profiling without any code changes. Here is a random program that we will profile:</p>
+<pre class="p1"><span class="s1">fn a(n: u64) -&gt; u64 {<br/></span><span class="s1">   if n&gt;0 {<br/></span><span class="s1">      b(n);<br/></span><span class="s1">      b(n);<br/></span><span class="s1">   }<br/></span><span class="s1">   n * n<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn b(n: u64) -&gt; u64 {<br/></span><span class="s1">   c(n);<br/></span><span class="s1">   c(n);<br/></span><span class="s1">   n + 2 / 3<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn c(n: u64) -&gt; u64 {<br/></span><span class="s1">   a(n-1);<br/></span><span class="s1">   a(n-1);<br/></span><span class="s1">   vec![1, 2, 3].into_iter().map(|x| x+2).sum()<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   a(6);<br/></span><span class="s1">}</span></pre>
+<p>To profile the application we run the following command:</p>
+<pre class="p1"><span class="s1"><strong>$ cargo profiler callgrind --bin ./target/debug/performance_profiling4 -n 10</strong><br/></span></pre>
+<p>This will run the program and collect information regarding which functions were most used. This profiler also has another option to profile memory usage. The output will look like the following:</p>
+<pre class="p1"><strong><span class="s1">Profiling </span><span class="s2">performance_profiling4 with callgrind...<br/><br/></span><span class="s2">Total Instructions</span><span class="s3">...344,529,557<br/><br/></span><span class="s2">27,262,872 (</span><span class="s4">7.9%</span><span class="s2">) ???:core::iter::iterator::Iterator<br/></span><span class="s2">----------------------------------------------------------<br/></span><span class="s2">22,319,604 (</span><span class="s4">6.5%</span><span class="s2">) ???:&lt;alloc::vec<br/></span><span class="s2">----------------------------------------------------------<br/></span><span class="s2">16,627,356 (</span><span class="s4">4.8%</span><span class="s2">) ???:&lt;core::iter<br/></span><span class="s2">----------------------------------------------------------<br/></span><span class="s2">13,182,048 (</span><span class="s4">3.8%</span><span class="s2">) ???:&lt;alloc::vec<br/></span><span class="s2">----------------------------------------------------------<br/></span><span class="s2">10,785,312 (</span><span class="s4">3.1%</span><span class="s2">) ???:core::iter::iterator::Iterator::fold<br/>----------------------------------------------------------<br/></span><span class="s2">10,485,720 (</span><span class="s4">3.0%</span><span class="s2">) ???:core::mem<br/>----------------------------------------------------------<br/></span><span class="s2">8,088,984 (</span><span class="s4">2.3%</span><span class="s2">) ???:alloc::slice::hack<br/>----------------------------------------------------------<br/></span><span class="s2">7,639,596 (</span><span class="s4">2.2%</span><span class="s2">) ???:core::ptr<br/>----------------------------------------------------------<br/></span><span class="s2">7,190,208 (</span><span class="s4">2.1%</span><span class="s2">) ???:core::ptr<br/>----------------------------------------------------------<br/></span><span class="s2">7,190,016 (</span><span class="s4">2.1%</span><span class="s2">) ???:performance_profiling4</span></strong></pre>
+<p>This clearly<span> shows us </span>that the most time is spent in iterator and vector creation. Running this command may make the program execute much more slowly than normal, but it also saves writing any code before profiling.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

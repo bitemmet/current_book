@@ -1,0 +1,64 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Mutability, Ownership, and Pure Functions</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Mutability, Ownership, and Pure Functions</h1>
+                </header>
+            
+            <article>
+                
+<div class="page">
+<div class="layoutArea">
+<div class="column">
+<ol>
+<li>What does <kbd>Rc</kbd> stand for?</li>
+</ol>
+<p style="padding-left: 60px"><kbd>Rc</kbd> stands for Reference Counted.</p>
+<ol start="2">
+<li>What does <kbd>Arc</kbd> stand for?</li>
+</ol>
+<p style="padding-left: 60px"><kbd>Arc</kbd> stands for Atomically Reference Counted.</p>
+<ol start="3">
+<li>What is a weak reference?</li>
+</ol>
+<p style="padding-left: 60px">A weak reference is a reference that is not reference counted or otherwise managed.</p>
+<ol start="4">
+<li>Which superpowers are enabled in unsafe blocks?</li>
+</ol>
+<p style="padding-left: 60px">In an unsafe block, you can dereference a raw pointer, call an unsafe function or method, access or modify a mutable static variable, or implement and unsafe trait.</p>
+<ol start="5">
+<li>When will an object be dropped?</li>
+</ol>
+<p style="padding-left: 60px">An object will be dropped when its owner is dropped or goes out of scope.</p>
+<ol start="6">
+<li>What is the difference between lifetimes and ownership?</li>
+</ol>
+<p style="padding-left: 60px">Lifetimes are a compile-time check. Ownership is a compile-time as well as runtime concept. Both concepts describe the tracking of variables, values, and whether and who uses them.</p>
+<ol start="7">
+<li>How can you be sure that a function is safe?</li>
+</ol>
+<p style="padding-left: 60px">In Rust, there is no way to declare the absence of unsafe behavior in functions.</p>
+<ol start="8">
+<li>What is memory corruption and how would it affect a program?</li>
+</ol>
+<p style="padding-left: 60px">There are two types of memory corruption—physical memory corruption and software memory corruption. If your physical memory is corrupted, then you need to replace your hardware. Software memory corruption refers to anything the program has done to destroy the semantic structure of its own program. When memory is corrupted, everything goes wrong; this is one of the hardest classes of bugs to diagnose and treat.</p>
+</div>
+</div>
+</div>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

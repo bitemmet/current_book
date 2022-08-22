@@ -1,0 +1,31 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Summary</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Summary</h1>
+                </header>
+            
+            <article>
+                
+<p>In this chapter, we worked with legacy code and foreign libraries in Rust. Rust safeguards can be annoying to learn and sometimes burdensome to work with, but the alternative of fast and loose coding is also stressful and problematic.</p>
+<p>One of the motivations for Rust memory safety rules is the concept of double free memory, which we mentioned in this chapter. However, the code presented did not involve a real double free of memory. A real double free causes something known as undefined behavior. Undefined behavior is a term used in language standards to refer to operations that will cause the program to act strangely. Double freed memory is typically one of the worst types of undefined behavior, causing memory corruption and subsequent crashes or invalid states that are hard to trace back to the original cause.</p>
+<p>In the latter half of the chapter, we examined specific Rust design decisions, features, and patterns such as ownership, immutability, and pure functions. These are Rust's defense mechanisms against undefined behavior and other ills.</p>
+<p>Using Rust safeguards correctly and not circumventing them has many benefits. Rust encourages a certain style of programming that benefits the design of larger projects. Typically, project architecture follows a more-than-linear bug/complexity curve. As a project grows in size, the number of bugs and difficult situations will grow at an even faster rate. By locking down common sources of bugs or code dependency, it is possible to develop large projects with fewer problems.</p>
+<p>In the next chapter, we will formally explain many functional design patterns. This will be a good opportunity to learn the extent to which functional programming principles apply and are relevant to Rust. If nothing in the next chapter seems cool or useful, then the author has failed.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

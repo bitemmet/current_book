@@ -1,0 +1,48 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Printing real-time statistics</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Printing real-time statistics</h1>
+                </header>
+            
+            <article>
+                
+<p>To print real-time statistics, we will use a console formatting library. This allows us to easily move the cursor around the screen and write clear and easily formattable text. This is depicted as follows:</p>
+<ol>
+<li>To get started, we should grab some information and a handle to <kbd>stdout</kbd> and store it outside of our loop. This is shown in the following code:</li>
+</ol>
+<pre class="p1" style="padding-left: 90px"><span class="s1">let termsize = termion::terminal_size().ok();<br/></span><span class="s1">let termwidth = termsize.map(|(w,_)| w-2).expect("termwidth");<br/></span><span class="s1">let termheight = termsize.map(|(_,h)| h-2).expect("termheight");<br/></span><span class="s1">let mut _stdout = io::stdout(); //lock once, instead of once per write<br/></span><span class="s1">let mut stdout = _stdout.lock().into_raw_mode().unwrap();</span></pre>
+<ol start="2">
+<li>Inside the loop, let's start by clearing a space to render our output:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">print!("{}{}", clear::All, cursor::Goto(1, 1));<br/></span><span class="s1">for tx in 0..(termwidth-1)<br/></span><span class="s1">{<br/></span><span class="s1">   for ty in 0..(termheight-1)<br/></span><span class="s1">   {<br/></span><span class="s1">      write!(stdout, "{}", cursor::Goto(tx+1, ty+1));<br/></span><span class="s1">      write!(stdout, "{}", " ");<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<ol start="3">
+<li>Then, we can render the elevator shaft and carriage. The elevator shaft will be simple brackets, one for each floor on the left and right. The elevator carriage will be an <kbd>X</kbd> mark placed on the floor closest to the current carriage location. We calculate each floor location by multiplying <kbd>floor_height</kbd> by floor offset from the ground floor. Then, we compare each floor location to the carriage locations to find the closest one. The code is as follows:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">print!("{}{}{}", clear::All, cursor::Goto(1, 1), cursor::Hide);<br/></span><span class="s1">let carriage_floor = (location / floor_height).floor() as u64;<br/></span><span class="s1">let carriage_floor = cmp::max(carriage_floor, 0);<br/></span><span class="s1">let carriage_floor = cmp::min(carriage_floor, floor_count-1);<br/></span><span class="s1">for tx in 0..(termwidth-1)<br/></span><span class="s1">{<br/></span><span class="s1">   for ty in 0..(termheight-1)<br/></span><span class="s1">   {<br/></span><span class="s1">      write!(stdout, "{}", cursor::Goto(tx+1, ty+1));</span><span class="s1"><br/></span><span class="s1">      if tx==0 &amp;&amp; (ty as u64)&lt;floor_count {<br/></span><span class="s1">         write!(stdout, "{}", "[");<br/></span><span class="s1">      } else if tx==1 &amp;&amp; (ty as u64)==((floor_count-1)-carriage_floor) {<br/></span><span class="s1">         write!(stdout, "{}", "X");<br/></span><span class="s1">      } else if tx==2 &amp;&amp; (ty as u64)&lt;floor_count {<br/></span><span class="s1">         write!(stdout, "{}", "]");<br/></span><span class="s1">      } else {<br/></span><span class="s1">         write!(stdout, "{}", " ");<br/></span><span class="s1">      }</span><span class="s1"><br/></span><span class="s1">   }<br/></span><span class="s1">}<br/></span><span class="s1">stdout.flush().unwrap();</span></pre>
+<ol start="4">
+<li>Now, we need to print real-time statistics. In addition to location, velocity, and acceleration, let's also display the nearest floor and motor input voltage, as follows:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">write!(stdout, "{}", cursor::Goto(6, 1));<br/></span><span class="s1">write!(stdout, "Carriage at floor {}", carriage_floor+1);<br/></span><span class="s1">write!(stdout, "{}", cursor::Goto(6, 2));<br/></span><span class="s1">write!(stdout, "Location<span class="Apple-converted-space">          </span>{}", location);<br/></span><span class="s1">write!(stdout, "{}", cursor::Goto(6, 3));<br/></span><span class="s1">write!(stdout, "Velocity<span class="Apple-converted-space">          </span>{}", velocity);<br/></span><span class="s1">write!(stdout, "{}", cursor::Goto(6, 4));<br/></span><span class="s1">write!(stdout, "Acceleration<span class="Apple-converted-space">      </span>{}", acceleration);<br/></span><span class="s1">write!(stdout, "{}", cursor::Goto(6, 5));<br/></span><span class="s1">write!(stdout, "Voltage [up-down] {}", up_input_voltage-down_input_voltage);</span></pre>
+<ol start="5">
+<li>Here, we find that the Terminal screen is tearing, so let's adjust the output to use a buffer:</li>
+</ol>
+<pre class="p1" style="padding-left: 30px"><span class="s1">let mut terminal_buffer </span>= vec![' ' as <span class="s1">u8;</span><span class="s1"> (termwidth*termheight) as usize];<br/></span><span class="s1">for ty in 0..floor_count<br/></span><span class="s1">{<br/></span><span class="s1">   terminal_buffer[ (ty*termwidth + 0) as usize ] = '[' as u8;<br/></span><span class="s1">   terminal_buffer[ (ty*termwidth + 1) as usize ] =<br/></span><span class="s1">      if <span class="Apple-converted-space">  </span>(ty as u64)==((floor_count-1)-carriage_floor) { 'X' as u8 }<br/></span><span class="s1">      else { ' ' as u8 };<br/></span><span class="s1">   terminal_buffer[ (ty*termwidth + 2) as usize ] = ']' as u8;<br/></span><span class="s1">   terminal_buffer[ (ty*termwidth + termwidth-2) as usize ] = '\r' as u8;<br/></span><span class="s1">   terminal_buffer[ (ty*termwidth + termwidth-1) as usize ] = '\n' as u8;<br/></span><span class="s1">}<br/></span><span class="s1">let stats = vec![<br/></span><span class="s1">   format!("Carriage at floor {}", carriage_floor+1),<br/></span><span class="s1">   format!("Location<span class="Apple-converted-space">          </span>{}", location),<br/></span><span class="s1">   format!("Velocity<span class="Apple-converted-space">          </span>{}", velocity),<br/></span><span class="s1">   format!("Acceleration<span class="Apple-converted-space">      </span>{}", acceleration),<br/></span><span class="s1">   format!("Voltage [up-down] {}", up_input_voltage-down_input_voltage)<br/></span><span class="s1">];<br/></span><span class="s1">for sy in 0..stats.len()<br/></span><span class="s1">{<br/></span><span class="s1">   for (sx,sc) in stats[sy].chars().enumerate()<br/></span><span class="s1">   {<br/></span><span class="s1">      terminal_buffer[ sy*(termwidth as usize) + 6 + sx ] = sc as u8;<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/></span><span class="s1">write!(stdout, "{}", String::from_utf8(terminal_buffer).unwrap());</span><span class="s1"> </span></pre>
+<p>Now, our screen will clearly display real-time information until the loop ends.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

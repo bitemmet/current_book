@@ -1,0 +1,34 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Logarithmic growth</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Logarithmic growth</h1>
+                </header>
+            
+            <article>
+                
+<p>Logarithmic algorithms are the pride of computer science. If your <em>O</em>(<em>n</em>) for <em>n</em>=5 code could have been written with an <em>O</em>(<em>log n</em>) algorithm, then surely at least one person will point this out.</p>
+<p>A binary search is O(<em>log n</em>). A sort is typically <em>O</em>(<em>n log n</em>). Everything with a log in it is better. This fondness is not misplaced. Logarithmic growth has an amazing property—growth slows down as the input value increases.</p>
+<p>Here is a program emphasizing logarithmic growth. We initialize a vector with random numbers having size of 1000 or 10000. Then we use the builtin library to sort and perform 100 binary search operations. First let's capture the time for sort and search for the 1000 case:</p>
+<pre class="p1"><span class="s1">extern crate rand;<br/></span><span class="s1">extern crate flame;<br/></span><span class="s1">use std::fs::File;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let mut data = vec![0; 1000];<br/></span><span class="s1">   for di in 0..data.len() {<br/></span><span class="s1">      data[di] = rand::random::&lt;u64&gt;();<br/></span><span class="s1">   }<br/><br/></span><span class="s1">   flame::start("sort n=1000");<br/></span><span class="s1">   data.sort();<br/></span><span class="s1">   flame::end("sort n=1000");<br/><br/></span><span class="s1">   flame::start("binary search n=1000 100 times");<br/></span><span class="s1">   for _ in 0..100 {<br/></span><span class="s1">      let c = rand::random::&lt;u64&gt;();<br/></span><span class="s1">      data.binary_search(&amp;c).ok();<br/></span><span class="s1">   }<br/></span><span class="s1">   flame::end("binary search n=1000 100 times");</span></pre>
+<p>Now we profile the 10000 case:</p>
+<pre class="p1"><span class="s1">   let mut data = vec![0; 10000];<br/></span><span class="s1">   for di in 0..data.len() {<br/></span><span class="s1">      data[di] = rand::random::&lt;u64&gt;();<br/></span><span class="s1">   }<br/><br/></span><span class="s1">   flame::start("sort n=10000");<br/></span><span class="s1">   data.sort();<br/></span><span class="s1">   flame::end("sort n=10000");<br/><br/></span><span class="s1">   flame::start("binary search n=10000 100 times");<br/></span><span class="s1">   for _ in 0..100 {<br/></span><span class="s1">      let c = rand::random::&lt;u64&gt;();<br/></span><span class="s1">      data.binary_search(&amp;c).ok();<br/></span><span class="s1">   }<br/></span><span class="s1">   flame::end("binary search n=10000 100 times");<br/></span><span class="s1"><br/>   flame::dump_html(&amp;mut File::create("flame-graph.html").unwrap()).unwrap();<br/></span><span class="s1">}</span></pre>
+<p>After running this and examining the flamegraphs, we can see that sorting for a vector that is 10 times larger takes barely 10 times as much time—<kbd>O(n log n)</kbd>. Search performance is hardly affected at all—<kbd>O(log n)</kbd>. So for practical uses, logarithmic growth is almost negligible.</p>
+<p>When trying to optimize logarithmic code, follow the same approach as for constant time optimization. Logarithmic complexity is usually not a good target for optimization, particularly considering that logarithmic complexity is a strong indicator of good algorithm design.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

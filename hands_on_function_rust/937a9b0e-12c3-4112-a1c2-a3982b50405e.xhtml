@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Integration testing</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Integration testing</h1>
+                </header>
+            
+            <article>
+                
+<p>Integration testing focuses on testing external interfaces of a program. It is also called <strong>blackbox testing</strong>. To create integration tests, focus on what the input and output of a program or module should be. Think of the different configurations of options, data, and possible internal interactions to create tests. These tests should then provide good coverage of high-level behavior of the completed program.</p>
+<p>To create an integration test, we first need to reconfigure our project as a module that can be imported. Integration tests do not have access to symbols other than what they can reference from <kbd>use</kbd> statements. To accomplish this, we can move the program logic into a <kbd>src/lib.rs</kbd> file and use a simple wrapper for <kbd>src/main.rs</kbd> . After this change, the <kbd>lib.rs</kbd> file should contain all of the code from <kbd>main.rs</kbd>, with the one change of renaming the <kbd>main</kbd> function to <kbd>run_simulation</kbd> and making the function public. The <kbd>main.rs</kbd> wrapper should then look as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">extern crate elevator;<br/><br/></span><span class="s1">fn main()<br/></span><span class="s1">{<br/></span><span class="s1">   elevator::run_simulation();<br/></span><span class="s1">}</span></pre>
+<p>Now, in order to create an integration test:</p>
+<ol>
+<li>Create a  <kbd>tests/</kbd> directory</li>
+<li>Create an <kbd>integration_tests.rs</kbd> file inside the <kbd>tests/</kbd> directory</li>
+<li>Inside the <kbd>integration_tests.rs</kbd> file, create functions for each test case</li>
+</ol>
+<p>We will create a single test case here to accept a specific elevator request and check that the requests are processed in a reasonable amount of time. The test harness is as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">extern crate elevator;<br/></span><span class="s1">extern crate timebomb;<br/></span><span class="s1">use timebomb::timeout_ms;<br/><br/></span><span class="s1">#[test]<br/></span><span class="s1">fn test_main() {<br/></span><span class="s1">   timeout_ms(|| {<br/></span><span class="s1">      elevator::run_simulation();<br/></span><span class="s1">   }, 300000);<br/></span><span class="s1">}</span></pre>
+<p>As input, we will use a <kbd>5</kbd> story building, <kbd>5.67</kbd> meters for each floor, and <kbd>7</kbd> floor requests. The file will be stored as <kbd>test1.txt</kbd> and should have the following structure:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">5<br/></span><span class="s1">5.67<br/></span><span class="s1">2<br/></span><span class="s1">1<br/></span><span class="s1">4<br/></span><span class="s1">0<br/></span><span class="s1">3<br/></span><span class="s1">1<br/></span><span class="s1">0</span></pre>
+<p>With these tests in place, we can now confirm that the basic logic is working and that the program as a whole function properly. To run all tests, call <kbd>cargo test</kbd>, or use a specific test case with <kbd>cargo test casename</kbd>.</p>
+<p>A sample test run is as follows:</p>
+<pre><strong>[ ]   Carriage at floor 1</strong><br/><strong>[ ]   Location          2.203829</strong><br/><strong>[ ]   Velocity          -2.157214</strong><br/><strong>[ ]   Acceleration      1.000000</strong><br/><strong>[X]   Voltage [up-down] 1620000.000000</strong><br/><br/><strong>[ ]   Carriage at floor 3</strong><br/><strong>[ ]   Location          11.344785</strong><br/><strong>[X]   Velocity          0.173572</strong><br/><strong>[ ]   Acceleration      -1.000000</strong><br/><strong>[ ]   Voltage [up-down] 1320000.000000</strong><br/><br/><strong>[ ]   Carriage at floor 4</strong><br/><strong>[X]   Location          19.235710</strong><br/><strong>[ ]   Velocity          2.669347</strong><br/><strong>[ ]   Acceleration      -1.000000</strong><br/><strong>[ ]   Voltage [up-down] 1320000.000000</strong><br/><br/><strong>[ ]   Carriage at floor 1</strong><br/><strong>[ ]   Location          0.133051</strong><br/><strong>[ ]   Velocity          0.160799</strong><br/><strong>[ ]   Acceleration      -1.000000</strong><br/><strong>[X]   Voltage [up-down] 1320000.000000</strong></pre>
+<p>Once the simulation completes, the summary and test results are as follows:</p>
+<pre><strong>Average of location                 5.017036</strong><br/><strong>Standard deviation of location      8.813507</strong><br/><br/><strong>Average of velocity                 -0.007597</strong><br/><strong>Standard deviation of velocity      2.107692</strong><br/><br/><strong>Average of acceleration             0.000850</strong><br/><strong>Standard deviation of acceleration  0.995623</strong><br/><br/><strong>Average of voltage                  1470109.838195</strong><br/><strong>Standard deviation of voltage       149352.287579</strong><br/><br/><strong>test test_main ... ok</strong><br/><br/><strong>test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out</strong><br/><br/><strong><span class="s1">running 1 test<br/></span><span class="s1">test tests::variable_stats ... </span><span class="s2">ok<br/></span><span class="s1"><br/>test result: </span><span class="s2">ok</span><span class="s1">. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out</span></strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

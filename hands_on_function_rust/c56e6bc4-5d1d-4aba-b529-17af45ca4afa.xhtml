@@ -1,0 +1,92 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Understanding Send and Sync traits</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Understanding Send and Sync traits</h1>
+                </header>
+            
+            <article>
+                
+<p>In the previous neural network example, we used a static data structure that was shared between threads without being wrapped in a counter or lock. It contained locks, but why was the outer data structure permitted to be shared?</p>
+<p>To answer this question, let's first review the rules of ownership:</p>
+<ul>
+<li>Each value in Rust has a variable that's called its <strong>owner</strong></li>
+<li>There can only be one owner at a time</li>
+<li>When the owner goes out of scope, the value will be dropped</li>
+</ul>
+<p>With these rules in mind, let's try to share a variable across threads, as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::thread;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let a = vec![1, 2, 3];<br/><br/></span><span class="s1">   thread::spawn(|| {<br/></span><span class="s1">      println!("a = {:?}", a);<br/></span><span class="s1">   });<br/>}</span></pre>
+<p>If we try to compile this, then we will get an error complaining of the following:</p>
+<pre><strong>closure may outlive the current function, but it borrows `a`, which is owned by the current function</strong></pre>
+<p>This error indicates the following:</p>
+<ul>
+<li>Referencing variable <kbd>a</kbd> from inside the closure is okay</li>
+<li>The closure lives longer than variable <kbd>a</kbd></li>
+</ul>
+<p>Closures sent to threads must have a static lifetime. Variable <kbd>a</kbd> is a local variable, and thus will go out of scope before the static closure.</p>
+<p>To fix this error, it is common to move the variable <kbd>a</kbd> into the closure. Thus, <kbd>a</kbd> will inherit the same lifetime as the closure:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::thread;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let a = vec![1, 2, 3];<br/><br/></span><span class="s1">   thread::spawn(move || {<br/></span><span class="s1">      println!("a = {:?}", a);<br/></span><span class="s1">   });<br/></span><span class="s1">}</span></pre>
+<p>This program will compile and run. Ownership of the variable <kbd>a</kbd> is transferred to the closure and therefore lifetime issues are avoided. It should be noted that transferring ownership of a variable implies that the original variable is no longer valid. This is caused by ownership rule number <kbd>2</kbd>—there can only by one owner at a time.</p>
+<p>If we try to share the variable again, we get an error:</p>
+<pre class="p1" style="padding-left: 30px">use std::thread;<span class="s1"><br/></span><span class="s1"><br/>fn main() {<br/></span><span class="s1">   let a = vec![1, 2, 3];<br/><br/></span><span class="s1">   thread::spawn(move || {<br/></span><span class="s1">      println!("a = {:?}", a);<br/></span><span class="s1">   });<br/><br/></span><span class="s1">   thread::spawn(move || {<br/></span><span class="s1">      println!("a = {:?}", a);<br/></span><span class="s1">   });<br/></span><span class="s1">}</span></pre>
+<p>Compiling this gives us this error message:</p>
+<pre class="p1"><span class="s1">$ rustc t.rs<br/></span><span class="s2">error[E0382]</span><span class="s1">: capture of moved value: `a`<br/></span><span class="s3">  --&gt; </span><span class="s1">t.rs:11:28<br/></span><span class="s3">   |<br/></span><span class="s3">6</span><span class="s1"><span class="Apple-converted-space">  </span></span><span class="s3">| </span><span class="s1"> <span class="Apple-converted-space">  </span>thread::spawn(move || {<br/></span><span class="s1">   | </span><span class="s4"> <span class="Apple-converted-space">                </span></span><span class="s1">-------</span><span class="s4"> </span><span class="s1">value moved (into closure) here<br/></span><span class="s1">...<br/></span><span class="s3">11</span><span class="s1"> </span><span class="s3">| </span><span class="s1"><span class="Apple-converted-space">      </span>println!("a = {:?}", a);<br/></span><span class="s3">   | </span><span class="s1"> <span class="Apple-converted-space">                          </span></span><span class="s2">^</span><span class="s1"> </span><span class="s2">value captured here after move<br/></span><span class="s3">   |<br/></span><span class="s3">   = </span><span class="s1">note: move occurs because `a` has type `std::vec::Vec&lt;i32&gt;`, which does not implement the `Copy` trait<br/><br/></span><span class="s2">error</span><span class="s1">: aborting due to previous error<br/><br/></span><span class="s1">For more information about this error, try `rustc --explain E0382`.</span></pre>
+<p>This compiler error is a bit complicated. It says the following:</p>
+<ul>
+<li><strong>Capture of moved value</strong>: <kbd>a</kbd></li>
+<li>Value moved (into closure) here</li>
+<li>Value captured here after move</li>
+<li>Note—move occurs because <kbd>a</kbd> does not implement the <kbd>Copy</kbd> trait</li>
+</ul>
+<p>Part four of the error tells us that if <kbd>a</kbd> implements the <kbd>Copy</kbd> trait, then we would not have this error. However, that would be implicitly copying the variable for us, meaning we would not be sharing data. So, that suggestion is not useful for us.</p>
+<p>The main problem is part one—capture of moved value <kbd>a</kbd>:</p>
+<ol>
+<li>First we move the variable <kbd>a</kbd> into the first closure. We needed to do this to avoid the lifetime problem and to use the variable. Using a variable in a closure is called a <strong>capture</strong>.</li>
+<li>Next we use variable <kbd>a</kbd> in the second closure. This is the <kbd>value captured after move</kbd>.</li>
+</ol>
+<p>So our problem is that moving variable <kbd>a</kbd> invalidates it for further use. A much simpler example of this problem would be as follows:</p>
+<pre style="padding-left: 30px">fn main() {<br/>   let a = vec![1, 2, 3];<br/>   let b = a;<br/>}</pre>
+<p>By moving ownership of the value in <kbd>a</kbd> into <kbd>b</kbd>, we invalidate the original variable.</p>
+<p>So what do we do? Are we stuck?</p>
+<p>In the neural network example, we used a shared data structure, so clearly there must be a way. If there is a way, hopefully there is also a rule to make sense of the problem. To fully understand thread-safety rules in Rust, you must understand three concepts—scope, <kbd>Send</kbd>, and <kbd>Sync</kbd>.</p>
+<p>First, let's address scope. Scope for threads means that variables used must be allowed to capture the variables that they used. Variables can be captured by value, by reference, or by mutable reference.</p>
+<p>Our first example, not using <kbd>move</kbd>, almost worked. The only problem was that the lifetime of the variable we used went out of scope too soon. All thread closures must have static lifetimes, and therefore variables that they capture must also have static lifetimes. Adjusting for this, we can create a simple two-thread program that captures our variable, <kbd>A</kbd>, by reference and therefore does not move the variable:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::thread;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   static A: [u8; 100] = [22; 100];<br/></span><span class="s1"><br/>   thread::spawn(|| {<br/></span><span class="s1">      A[3];<br/></span><span class="s1">   });<br/></span><span class="s1"><br/>   thread::spawn(|| {<br/></span><span class="s1">      A[3]<br/></span><span class="s1">   });<br/></span><span class="s1">}</span></pre>
+<p>Reading from static variables is safe. Mutating static variables is unsafe. Static variables are also disallowed from allocating heap memory directly, so they can be difficult to work with.</p>
+<p>Using the <kbd>lazy_static</kbd> crate is a good way to create static variables with types that have memory allocation and need initialization:</p>
+<pre class="p1"><span class="s1">use std::thread;<br/></span><span class="s1">#[macro_use] extern crate lazy_static;<br/><br/></span><span class="s1">lazy_static! {<br/></span><span class="s1">   static ref A: Vec&lt;u32&gt; = {<br/></span><span class="s1">      vec![1, 2, 3]<br/></span><span class="s1">   };<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   thread::spawn(|| {<br/></span><span class="s1">      A[1];<br/></span><span class="s1">   });<br/><br/></span><span class="s1">   thread::spawn(|| {<br/></span><span class="s1">      A[2];<br/></span><span class="s1">   });<br/></span><span class="s1">}</span></pre>
+<p>A second way to fix scope problems is to use a reference counter, such as <kbd>Arc</kbd>. Here, we use <kbd>Arc</kbd> instead of <kbd>Rc</kbd> because <kbd>Arc</kbd> is thread-safe and <kbd>Rc</kbd> is not. Consider the following code:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::thread;<br/></span><span class="s1">use std::sync::{Arc};<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let a = Arc::new(vec![1, 2, 3]);<br/></span><span class="s1">   {<br/></span><span class="s1">      let a = Arc::clone(&amp;a);<br/></span><span class="s1">      thread::spawn(move || {<br/></span><span class="s1">         a[1];<br/></span><span class="s1">      });<br/></span><span class="s1">   }<br/><br/></span><span class="s1">   {<br/></span><span class="s1">      let a = Arc::clone(&amp;a);<br/></span><span class="s1">      thread::spawn(move || {<br/></span><span class="s1">         a[1];<br/></span><span class="s1">      });<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>The reference counter moves the reference into the closure. However, the internal data is shared, so it is then possible to reference common data.</p>
+<p>If shared data should be mutated, then a <kbd>Mutex</kbd> lock can allow thread-safe locking. Another useful lock is the <kbd>std::sync::RwLock</kbd>. This is shown as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::thread;<br/></span><span class="s1">use std::sync::{Arc,Mutex};<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let a = Arc::new(Mutex::new(vec![1, 2, 3]));<br/></span><span class="s1">   {<br/></span><span class="s1">      let a = Arc::clone(&amp;a);<br/></span><span class="s1">      thread::spawn(move || {<br/></span><span class="s1">         let mut a = a.lock().unwrap();<br/></span><span class="s1">         (*a)[1] = 2;<br/></span><span class="s1">      });<br/></span><span class="s1">   }<br/></span><span class="s1">   {<br/></span><span class="s1">      let a = Arc::clone(&amp;a);<br/></span><span class="s1">      thread::spawn(move || {<br/></span><span class="s1">         let mut a = a.lock().unwrap();<br/></span><span class="s1">         (*a)[1] = 3;<br/></span><span class="s1">      });<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>So why is mutation allowed after the lock, but not before? The answer is <kbd>Send</kbd> and <kbd>Sync</kbd>.</p>
+<p><kbd>Send</kbd> and <kbd>Sync</kbd> are marker traits. A marker trait does not implement any functionality; however, it indicates that a type has some property. These two properties tell the compiler what behavior should be allowed with regards to sharing data between threads.</p>
+<p>These are the rules regarding thread data sharing:</p>
+<ul>
+<li>A type is <kbd>Send</kbd> if it is safe to send it to another thread</li>
+<li>A type is <kbd>Sync</kbd> if it is safe to share between multiple threads</li>
+</ul>
+<p>To make mutable data that can be shared across threads, whatever data type, you use must implement <kbd>Sync</kbd>. The standard Rust library has some thread-safe concurrency primitives, such as <kbd>Mutex</kbd>, for this purpose. If you don't like the options available, then you can search for another crate or make something yourself.</p>
+<p>To implement <kbd>Sync</kbd> for a type, just implement the trait with no body:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::thread;<br/></span><span class="s1"><br/>struct MyBox(u8);<br/></span><span class="s1">unsafe impl Send for MyBox {}<br/></span><span class="s1">unsafe impl Sync for MyBox {}<br/><br/></span><span class="s1">static A: MyBox = MyBox(22);<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   thread::spawn(move || {<br/></span><span class="s1">      A.0<br/></span><span class="s1">   });<br/></span><span class="s1">   thread::spawn(move || {<br/></span><span class="s1">      A.0<br/></span><span class="s1">   });<br/></span><span class="s1">}</span></pre>
+<p>Be warned—incorrectly implementing <kbd>Send</kbd> or <kbd>Sync</kbd> can cause undefined behavior. The traits are always unsafe to implement. Thankfully, both of these marker traits are generally derived by the compiler, so you will very rarely need to manually derive them.</p>
+<p>With these various rules in mind, we can see how Rust prevents many common threading bugs. Foremost, the ownership system prevents a lot of problems. Then, to allow some inter-thread communication, we find that channels and locks can help to safely implement most concurrency models.</p>
+<p>This was a lot of trial and error but, in summary, we learned that <kbd>thread</kbd>, <kbd>move</kbd>, <kbd>channel</kbd>,  <kbd>Arc</kbd>, and <kbd>Mutex</kbd> will get us through most problems.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

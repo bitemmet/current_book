@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the trip_planning.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the trip_planning.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The trip planner should work in static and dynamic modes. The basic structure is a FIFO queue, pushing requests into the queue, and popping the oldest element. We may be able to unify both static and dynamic modes into a single implementation, which would look like the following.</p>
+<p>Trip planning will be organized by purpose. The planner should work in two modes—static and dynamic. For static mode, the planner should accept a list of floor requests to process. For dynamic mode, the planner should accept floor requests as they come dynamically and add them to the queue. The planner module should contain the following:</p>
+<pre style="padding-left: 30px"><span class="s1">use std::collections::VecDeque;<br/><br/></span>pub struct FloorRequests<br/><span class="s1">{<br/></span><span class="s1">   pub requests: VecDeque&lt;u64&gt;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub trait RequestQueue<br/></span><span class="s1">{<br/></span><span class="s1">   fn add_request(&amp;mut self, req: u64);<br/></span><span class="s1">   fn add_requests(&amp;mut self, reqs: &amp;Vec&lt;u64&gt;);<br/></span><span class="s1">   fn pop_request(&amp;mut self) -&gt; Option&lt;u64&gt;;<br/></span><span class="s1">}<br/><br/></span><span class="s1">impl RequestQueue for FloorRequests<br/></span><span class="s1">{<br/></span><span class="s1">   fn add_request(&amp;mut self, req: u64)<br/></span><span class="s1">   {<br/></span><span class="s1">      self.requests.push_back(req);<br/></span><span class="s1">   }<br/></span><span class="s1">   fn add_requests(&amp;mut self, reqs: &amp;Vec&lt;u64&gt;)<br/></span><span class="s1">   {<br/></span><span class="s1">      for req in reqs<br/></span><span class="s1">      {<br/></span><span class="s1">         self.requests.push_back(*req);<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">   fn pop_request(&amp;mut self) -&gt; Option&lt;u64&gt;<br/></span><span class="s1">   {<br/></span><span class="s1">      self.requests.pop_front()<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

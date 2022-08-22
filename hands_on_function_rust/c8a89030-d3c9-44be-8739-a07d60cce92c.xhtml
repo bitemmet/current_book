@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Defining lifetimes on traits</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Defining lifetimes on traits</h1>
+                </header>
+            
+            <article>
+                
+<p>When defining, implementing, and instantiating an object implementing a trait, it is possible that both the object and trait will require a lifetime. Usually, it is possible to infer the lifetime of the trait from the lifetime of the object. When this is not possible, the programmer must declare a lifetime for the trait, which is compatible with all other constraints. The code is as follows:</p>
+<pre style="padding-left: 30px"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Red</span></span><span> { }<br/><br/></span><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Ball</span></span><span>&lt;</span><span class="hljs-symbol">'a</span><span>&gt; {<br/>   diameter: &amp;</span><span class="hljs-symbol">'a</span><span> </span><span class="hljs-built_in">i32</span><span>,<br/>}<br/><br/></span><span class="hljs-keyword">impl</span><span>&lt;</span><span class="hljs-symbol">'a</span><span>&gt; Red </span><span class="hljs-keyword">for</span><span> Ball&lt;</span><span class="hljs-symbol">'a</span><span>&gt; { }<br/><br/></span><span>static num: i32 = </span><span class="hljs-number">5</span><span>;<br/></span><span class="hljs-keyword">let</span><span> obj = </span><span class="hljs-built_in">Box</span><span>::new(Ball { diameter: &amp;num }) </span><span class="hljs-keyword">as</span><span> </span><span class="hljs-built_in">Box</span><span>&lt;Red + 'static&gt;;</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

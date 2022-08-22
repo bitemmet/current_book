@@ -1,0 +1,45 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Algebraic datatypes</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Algebraic datatypes</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">In addition to structs/objects and functions/methods, Rust functional programming includes some rich additions to definable types and structures. Tuples provide a shorthand for defining simple anonymous structs. Enums provide a type-safe approach to unions of complex data structures with the added bonus of a constructor tag to help in pattern matching. The standard library has extensive support for generic programming, from base types to collections. Even the object system traits are a hybrid cross between the OOP concept of a class and the FP concept of type classes. Functional style lurks around every corner, and even if you don't seek them in Rust, you will probably find yourself unknowingly using the features.</span></p>
+<p class="p1">The <kbd>type</kbd> aliases <span class="s1">can be helpful to create shorthand names for complex types. Alternatively, the <kbd>newtype</kbd> struct pattern can be used to create an alias with different non-equivalent types. Consider the following example, in <kbd>intro_datatypes.rs</kbd>:</span></p>
+<pre class="p2" style="padding-left: 30px"><span class="s2">//alias<br/>type Name = String;<br/><br/>//newtype<br/>struct NewName(String);</span></pre>
+<p class="p1">A <kbd>struct</kbd><span class="s1">, even when parameterized, can be repetitive when used simply to store multiple values into a single object. This can be seen in<span> </span><kbd>intro_datatypes.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">struct Data1<br/>{<br/>    a: i32,<br/>    b: f64,<br/>    c: String<br/>}<br/><br/>struct Data2<br/>{<br/>    a: u32,<br/>    b: String,<br/>    c: f64<br/>}</pre>
+<p class="p1">A tuple <span class="s1">helps eliminate redundant struct definitions. No prior type definitions are necessary to use tuples. Consider the following example, <span>in </span><kbd>intro_datatypes.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">//alias to tuples<br/>type Tuple1 = (i32, f64, String);<br/>type Tuple2 = (u32, String, f64);<br/><br/>//named tuples<br/>struct New1(i32, f64, String);<br/>struct New2(u32, String, f64);</pre>
+<p class="p1"><span class="s1">Standard operators can be implemented for any type by implementing the correct trait. Consider the following example for this, <span>in </span><kbd>intro_datatypes.rs</kbd>:</span></p>
+<pre style="padding-left: 30px"><span>use std::ops::Mul;<br/><br/>struct Point<br/>{<br/>    x: i32,<br/>    y: i32<br/>}<br/><br/>impl Mul for Point<br/>{<br/>    type Output = Point;<br/>    fn mul(self, other: Point) -&gt; Point<br/>    {<br/>        Point<br/>        {<br/>            x: self.x * other.x,<br/>            y: self.y * other.y<br/>        }<br/>    }<br/>}</span></pre>
+<p class="p1"><span class="s1">Standard library collections and many other built-in types are generic, such as <kbd>HashMap</kbd> in <kbd>intro_datatypes.rs</kbd>:</span></p>
+<pre style="padding-left: 30px"><span>use std::collections::HashMap;<br/><br/></span>type CustomHashMap = HashMap&lt;i32,u32&gt;;</pre>
+<p class="p1"><span class="s1">Enums are a type-safe union of multiple types. Note that recursive <kbd>enum</kbd> definitions must wrap the inner value in a container such as <kbd>Box</kbd>, otherwise the size would be infinite. This is depicted as follows, <span>in </span><kbd>intro_datatypes.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">enum BTree&lt;T&gt;<br/>{<br/>    <span>Branch { val:T, left:Box&lt;BTree&lt;T&gt;&gt;, right:Box&lt;BTree&lt;T&gt;&gt; },</span><br/>    Leaf { val: T }<br/>}</pre>
+<p class="p1"><span class="s1">Tagged unions are also used for more complex data structures. Consider the following code, <span>in </span><kbd>intro_datatypes.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">enum Term<br/>{<br/>    TermVal { value: String },<br/>    TermVar { symbol: String },<br/>    TermApp { f: Box&lt;Term&gt;, x: Box&lt;Term&gt; },<br/>    TermAbs { arg: String, body: Box&lt;Term&gt; }<br/>}</pre>
+<p class="p1">Traits are a bit like object classes (OOP), shown with the following code example, in <kbd>intro_datatypes.rs</kbd>:</p>
+<pre style="padding-left: 30px">trait Data1Trait<br/>{<br/>    //constructors<br/>    fn new(a: i32, b: f64, c: String) -&gt; Self;<br/>    <br/>    //methods<br/>    fn get_a(&amp;self) -&gt; i32;<br/>    fn get_b(&amp;self) -&gt; f64;<br/>    fn get_c(&amp;self) -&gt; String;<br/>}</pre>
+<p class="p1">Traits are also like type classes (FP), shown with the following code snippet, in <kbd>intro_datatypes.rs</kbd>:</p>
+<pre style="padding-left: 30px">trait BehaviorOfShow<br/>{<br/>    fn show(&amp;self) -&gt; String;<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

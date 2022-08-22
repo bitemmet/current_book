@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Defining lifetime subtyping</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Defining lifetime subtyping</h1>
+                </header>
+            
+            <article>
+                
+<p>It is possible to have a single object that requires a long lifetime for itself but also needs a shorter lifetime for some of its components or methods. This can be accomplished by parameterizing multiple lifetimes. This usually works well unless the lifetimes come into conflict. The following is an example of multiple lifetimes:</p>
+<pre class="p1"><span class="s1">struct Context&lt;'s&gt;(&amp;'s mut String);<br/><br/></span><span class="s1">impl&lt;'s&gt; Context&lt;'s&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   fn mutate&lt;'c&gt;(&amp;mut self, cs: &amp;'c mut String) -&gt; &amp;'c mut String</span></pre>
+<pre class="p1"><span class="s1"><br/></span><span class="s1">   {<br/></span><span class="s1">      let swap_a = self.0.pop().unwrap();<br/></span><span class="s1">      let swap_b = cs.pop().unwrap();<br/></span><span class="s1">      self.0.push(swap_b);<br/></span><span class="s1">      cs.push(swap_a);<br/></span><span class="s1">      cs<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span>fn main() {<br/><span class="s1">   let mut s = "outside string context abc".to_string();<br/></span><span class="s1">   {<br/></span><span class="s1">      //temporary context<br/></span><span class="s1">      let mut c = Context(&amp;mut s);<br/></span><span class="s1">      {<br/></span><span class="s1">         //further temporary context<br/></span><span class="s1">         let mut s2 = "inside string context def".to_string();<br/></span><span class="s1">         c.mutate(&amp;mut s2);<br/></span><span class="s1">         println!("s2 {}", s2);<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">   println!("s {}", s);<br/></span>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

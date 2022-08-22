@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Querying library and session state</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Querying library and session state</h1>
+                </header>
+            
+            <article>
+                
+<p>Several functions that query the library and session state are available, mostly for debugging purposes:</p>
+<pre>pub fn is_override() -&gt; bool<br/>{<br/>   unsafe {<br/>      magic::is_override() != 0<br/>   }<br/>}<br/><br/>pub fn is_privileged() -&gt; bool<br/>{<br/>   unsafe {<br/>      magic::is_privileged() != 0<br/>   }<br/>}<br/><br/>pub fn is_admin() -&gt; bool<br/>{<br/>   unsafe {<br/>      magic::is_admin() != 0<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

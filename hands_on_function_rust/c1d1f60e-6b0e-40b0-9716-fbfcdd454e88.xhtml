@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Issuing override codes</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Issuing override codes</h1>
+                </header>
+            
+            <article>
+                
+<p>This set of tests for the FFI functions confirms that issued command codes are received by the library:</p>
+<pre>#[test]<br/>fn issue_override_code() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(1);<br/>      assert!(magic::poll_override_code() == 1);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}<br/><br/>#[test]<br/>fn issue_privileged_code() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(2);<br/>      assert!(magic::poll_override_code() == 2);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}<br/><br/>#[test]<br/>fn issue_admin_code() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(3);<br/>      assert!(magic::poll_override_code() == 3);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

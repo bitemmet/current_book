@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the buildings.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the buildings.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The building module is again grouped by type. There should be a common trait interface that is implemented by the three buildings. The building traits and structures should additionally wrap and expose interfaces to appropriate elevator drivers and motor controllers. The code is as follows:</p>
+<ol>
+<li>First, we define the <kbd>Building</kbd> trait:</li>
+</ol>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub trait Building<br/></span><span class="s1">{<br/></span><span class="s1">   fn get_elevator_driver(&amp;self) -&gt; Box&lt;ElevatorDriver&gt;;<br/></span><span class="s1">   fn get_motor_controller(&amp;self) -&gt; Box&lt;MotorController&gt;;<br/></span><span class="s1">   fn get_floor_heights(&amp;self) -&gt; Vec&lt;f64&gt;;<br/>   fn get_carriage_weight(&amp;self) -&gt; f64;<br/>   fn clone(&amp;self) -&gt; </span>Box&lt;Building&gt;;<span class="s1"><br/>   fn serialize(&amp;self) -&gt; u64;<br/></span><span class="s1">}</span></pre>
+<ol start="2">
+<li>Then, we define a <kbd>deserialize</kbd> helper function:</li>
+</ol>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub fn deserialize(n: u64) -&gt; Box&lt;Building&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   if </span>n==1 {<br/>      Box::new(Building1)<span class="s1"><br/></span><span class="s1">   } else if n==2 {<br/></span><span class="s1">      Box::new(Building2)<br/></span><span class="s1">   } else {<br/></span><span class="s1">      Box::new(Building3)<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<ol start="3">
+<li>Then, we define some miscellaneous helper functions:</li>
+</ol>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub fn getCarriageFloor(floorHeights: Vec&lt;f64&gt;, height: f64) -&gt; u64<br/></span><span class="s1">{<br/></span><span class="s1">   let mut c = 0.0;<br/></span><span class="s1">   for (fi, fht) in floorHeights.iter().enumerate() {<br/></span><span class="s1">      c += fht;</span><span class="s1"><br/></span><span class="s1">      if height &lt;= c {<br/></span><span class="s1">         return (fi as u64)<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">   (floorHeights.len()-1) as u64<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub fn getCumulativeFloorHeight(heights: Vec&lt;f64&gt;, floor: u64) -&gt; f64<br/></span><span class="s1">{<br/></span><span class="s1">   heights.iter().take(floor as usize).sum()</span><span class="s1"><br/></span><span class="s1">}</span></pre>
+<ol start="4">
+<li>Finally, we define the buildings and their trait implementations:</li>
+</ol>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub struct Building1;<br/></span><span class="s1">impl Building for Building1 { ... }<br/></span><span class="s1"><br/>//Building 2<br/><br/>//Building 3</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

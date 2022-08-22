@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Compiling with release mode</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Compiling with release mode</h1>
+                </header>
+            
+            <article>
+                
+<p>This is a really simple suggestion that you should know about if you are at all concerned about performance.</p>
+<ul>
+<li>Rust normally compiles in debug mode, which is slow:</li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><strong><span class="s1">cargo build</span></strong></pre>
+<ul>
+<li>Rust optionally compiles in release mode, which is fast:</li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><strong><span class="s1">cargo build --release</span></strong></pre>
+<ul>
+<li>Here is a comparison using debug mode for a toy program:</li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><strong><span class="s1">$ time performance_release_mode<br/></span><span class="s1">real<span class="Apple-tab-span"> </span>0m13.424s<br/></span><span class="s1">user<span class="Apple-tab-span"> </span>0m13.406s<br/></span><span class="s1">sys<span class="Apple-tab-span"> </span>0m0.010s</span></strong></pre>
+<ul>
+<li>The following is the release mode:</li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><strong><span class="s1">$ time ./performance_release_mode<br/></span><span class="s1">real<span class="Apple-tab-span"> </span>0m0.316s<br/></span><span class="s1">user<span class="Apple-tab-span"> </span>0m0.309s<br/></span><span class="s1">sys<span class="Apple-tab-span"> </span>0m0.005s</span></strong></pre>
+<p>Release mode is 98% more efficient with regard to CPU usage for this example.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Defining the ErrorCode enum</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Defining the ErrorCode enum</h1>
+                </header>
+            
+            <article>
+                
+<p>Similar to <kbd>OverrideCode</kbd>, the <kbd>ErrorCode</kbd> enum defines typesafe labels for each of the library error codes. There is also a helper function to cast integers into the enum type:</p>
+<pre>pub enum ErrorCode {<br/>   DoubleAuthorize = 1,<br/>   DoubleFree = 2,<br/>   AccessDenied = 3,<br/>}<br/><br/>pub fn toErrorCode(i: i32) -&gt; ErrorCode {<br/>   match i {<br/>      1 =&gt; ErrorCode::DoubleAuthorize,<br/>      2 =&gt; ErrorCode::DoubleFree,<br/>      3 =&gt; ErrorCode::AccessDenied,<br/>      _ =&gt; panic!("Unexpected error code: {}", i)<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

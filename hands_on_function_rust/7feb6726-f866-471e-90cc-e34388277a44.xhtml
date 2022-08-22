@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the motion_controllers.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the motion_controllers.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The old logic from<span> </span><kbd>motor_controllers.rs</kbd><span> </span>for dynamically adjusting motor force will be moved to this module. The<span> </span><kbd>SmoothMotionController</kbd><span> </span>does not change much and the code becomes as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub trait MotionController<br/></span><span class="s1">{<br/></span><span class="s1">   fn init(&amp;mut self, esp: Box&lt;Building&gt;, est: ElevatorState);<br/></span><span class="s1">   fn adjust(&amp;mut self, est: &amp;ElevatorState, dst: u64) -&gt; f64;</span><span class="s1"><br/></span><span class="s1">}<br/><br/></span><span class="s1">pub struct SmoothMotionController<br/></span><span class="s1">{<br/></span><span class="s1">   pub esp: Box&lt;Building&gt;,<br/></span><span class="s1">   pub timestamp: f64<br/></span><span class="s1">}</span><span class="s1"><br/><br/></span><span class="s1">impl MotionController for SmoothMotionController<br/></span><span class="s1">{<br/></span><span class="s1">   ...</span><span class="s1"><br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

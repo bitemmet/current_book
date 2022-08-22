@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Learning about generics</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Learning about generics</h1>
+                </header>
+            
+            <article>
+                
+<p>Generics are a facility to write code for multiple contexts with different types, and parameterization allows the programmer to write code that makes fewer assumptions about the data structures and code segments involved in the code's definition. For example, a very ambiguous concept would be the concept of addition. When a programmer writes <kbd>a + b</kbd>, what does that mean? In Rust, the <kbd>Add</kbd> trait can be implemented for just about any type. As long as there is an implementation for the <kbd>Add</kbd> trait in scope that is compatible with the types of <kbd>a</kbd> and <kbd>b</kbd>, then this trait will define the operation. In this pattern, we can write generic code that defines a concept in its most abstract terms, allowing for later definitions of data and methods to interface with that code without change.</p>
+<p>A major example of completely generic code are built-in container data structures. Vectors and HashMaps must necessarily know the types of the objects they store. However, it would be very limiting if any assumptions were made about the underlying data structure or methods for the stored items. Therefore, parameterization of containers allows the container and its methods to explicitly declare trait bounds that are expected from stored types. All other characteristics of the stored item will be parameterized.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

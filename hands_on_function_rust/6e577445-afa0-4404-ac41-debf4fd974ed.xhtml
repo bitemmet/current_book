@@ -1,0 +1,73 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Functional design patterns</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Functional design patterns</h1>
+                </header>
+            
+            <article>
+                
+<p>Aside from file layout, there are a number of functional design patterns that help reduce code weight and redundancy. When used properly, these principles can help clarify design decisions and also enable robust architecture. Most design patterns are variants of the single responsibility principle. This can take many forms depending on the context, but the intent is the same; write code that does one thing well, then reuse that code as needed. I have explained this as follows:</p>
+<ul>
+<li><strong>Pure functions</strong>: These are functions with no side effects or logical dependencies other than function arguments. A side effect is a change of state that affects anything outside of the function, aside from the return value. Pure functions are useful because they can be tossed around and combined and generally used carelessly without the risk of unintended effects.</li>
+</ul>
+<div class="packt_infobox">The worst thing that can go wrong with a pure function is a bad return value or, in extreme cases, a stack overflow.</div>
+<p style="padding-left: 60px">It is harder to cause bugs with pure functions, even when used recklessly. Consider the following example of pure functions, in <kbd>intro_patterns.rs</kbd>:</p>
+<pre style="padding-left: 60px">fn pure_function1(x: u32) -&gt; u32<br/>{<br/>    x * x<br/>}<br/><br/>fn impure_function(x: u32) -&gt; u32<br/>{<br/>    println!("x = {}", x);<br/>    x * x<br/>}</pre>
+<ul>
+<li><strong>Immutability</strong>: Immutability is a pattern that helps encourage pure functions. Rust variable bindings are immutable <span>by default. This is Rust's not-so-subtle way of encouraging you to avoid mutable state. Don't do it. If you absolutely must, it is possible to tag variables with the</span> <kbd>mut</kbd> key<span>word to allow reassignment. This is shown with the following example, in <kbd>intro_patterns.rs</kbd>:</span></li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><span class="s1">let immutable_v1 = 1;<br/>//immutable_v1 = 2; //invalid<br/><br/>let mut mutable_v2 = 1;<br/>mutable_v2 = 2;</span></pre>
+<ul>
+<li><strong>Functional composition</strong>: Functional composition is a pattern where the output of one function is connected to the input of another function. In this fashion, functions can be chained together to create complex effects from simple steps. This is shown with the following code snippet, <span>in </span><kbd>intro_patterns.rs</kbd>:</li>
+</ul>
+<pre style="padding-left: 60px"><span>let fsin = |x: f64| x.sin();<br/></span><span>let fabs = |x: f64| x.abs();<br/><br/>//feed output of one into the other<br/>let transform = |x: f64| fabs(fsin(x));</span></pre>
+<ul>
+<li><strong>Higher-order functions</strong><span>: These</span> have already been mentioned before, but we haven't used the term yet. A HoF is a function that accepts a function as a parameter. Many iterator methods are HoFs. Consider the following example, <span>in </span><kbd>intro_patterns.rs</kbd>:</li>
+</ul>
+<pre class="rust trait" style="padding-left: 60px">fn filter&lt;P&gt;(self, <strong>predicate</strong>: P) -&gt; Filter&lt;Self, P&gt;<br/>where P: FnMut(&amp;Self::Item) -&gt; bool<br/>{ ... }</pre>
+<ul>
+<li><strong>Functors</strong>: If you can get past the name, these are a simple and effective design pattern. They are also very versatile. The concept is somewhat difficult to capture in its entirety, but you may think of functors as <em>the inverse of functions</em>. A function defines a transformation, accepts data, and returns the result of the transformation. A functor defines data, accepts a function, and returns the result of the transformation. A common example of a functor is the bound <kbd>map</kbd> method that frequently appears on containers, such as for a <kbd>Vec</kbd>. Here is an example, in <kbd>intro_patterns.rs</kbd>:</li>
+</ul>
+<pre class="rust rust-example-rendered" style="padding-left: 60px"><span class="macro">let mut c = 0;<br/>for _ in vec</span><span class="macro">!</span>[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>].<span class="ident">into_iter</span>()
+   .<span class="ident">map</span>(<span class="op">|</span><span class="ident">letter</span><span class="op">|</span> {<br/><span class="ident">      c</span> <span class="op">+=</span> <span class="number">1</span>; (<span class="ident">letter</span>, <span class="ident">c</span>)<br/>   }){};</pre>
+<div class="packt_quote" style="padding-left: 60px"><span>"A monad is a monoid in the category of endofunctors, what's the problem?"</span></div>
+<div class="mce-root packt_quote">                                                                                                – <em>Philip Wadler</em></div>
+<ul>
+<li><strong>Monads</strong>: Monads are a common stumbling block for people learning FP. Monads and functors are maybe the first words that you may encounter on a journey that goes deep into theoretical mathematics. We won't go there. For our purposes, monads are simply a <kbd>trait</kbd> with two methods. This is shown in the following code, <span>in </span><kbd>intro_patterns.rs</kbd>:</li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><span class="s1">trait Monad&lt;A&gt; {<br/>    fn return_(t: A) -&gt; Self;<br/>    //:: A -&gt; Monad&lt;A&gt;<br/><br/>    fn bind&lt;MB,B&gt;(m: Self, f: Fn(A) -&gt; MB) -&gt; MB<br/>    where MB: Monad&lt;B&gt;;<br/>    //:: Monad&lt;A&gt; -&gt; (A -&gt; Monad&lt;B&gt;) -&gt; Monad&lt;B&gt;<br/>}</span></pre>
+<p style="padding-left: 60px">If that doesn't help clarify things (and it probably doesn't), a monad has two methods. The first method is the constructor. The second method lets you bind an operation to create another monad. Many common traits have hidden semi-monads but, by making the concept explicit, the concept becomes a strong design pattern instead of a messy anti-pattern. Don't try to reinvent what you don't have to.</p>
+<ul>
+<li><strong>Function currying</strong>: Function currying is a technique that may seem strange for anyone coming from a background in object-oriented or imperative languages. The reason for this confusion is that in many functional languages, functions are curried by default, whereas this is not the case for other languages. Rust functions are not curried by default.</li>
+</ul>
+<p style="padding-left: 60px">The difference between curried and non-curried functions are that curried functions send in parameters one by one, whereas non-curried functions send in parameters all at once. Looking at a normal Rust function definition, we can see that it is not curried. Consider the following code, <span>in </span><kbd>intro_patterns.rs</kbd>:</p>
+<pre style="padding-left: 60px">fn not_curried(p1: u32, p2: u32) -&gt; u32<br/>{<br/>    p1 + p2<br/>}<br/><br/>fn main()<br/>{<br/>   //and calling it<br/>   not_curried(1, 2);<br/>}</pre>
+<p style="padding-left: 60px">A <kbd>curried</kbd> function takes each parameter one by one, as shown in the following, in <kbd>intro_patterns.rs</kbd>:</p>
+<pre style="padding-left: 60px">fn curried(p1: u32) -&gt; Box&lt;Fn(u32) -&gt; u32&gt;<br/>{<br/>    Box::new(move |p2: u32| {<br/>        p1 + p2<br/>    })<br/>}<br/><br/>fn main()<br/>{<br/>   //and calling it<br/>   curried(1)(2);<br/>}</pre>
+<p style="padding-left: 60px">Curried functions can be used as a function factory. The first few arguments configure how the final function should behave. The result is a pattern that allows shorthand configuration of complex operators. Currying complements all the other design patterns by converting individual functions into multiple components.</p>
+<ul>
+<li><strong>Lazy evaluation</strong>: Lazy evaluation is a pattern that is technically possible in other languages. However, it is uncommon to see it outside of FP, <span>due to language barriers. The difference between a normal expression and a lazy expression is that a lazy expression will not be evaluated until accessed. Here is a simple implementation of laziness, implemented behind a function call in <kbd>intro_patterns.rs</kbd>:</span></li>
+</ul>
+<pre style="padding-left: 60px">let x = { println!("side effect"); 1 + 2 };<br/><br/>let y = ||{ println!("side effect"); 1 + 2 };</pre>
+<p>The second expression will not be evaluated until the function is called, at which point the code resolves. For lazy expressions, side effects happen at time of resolution instead of at initialization. This is a poor implementation of laziness, so we will go into further detail in later chapters. The pattern is fairly common, and some operators and data structures require laziness to work. A simple example of necessary laziness is a lazy list that may not otherwise be possible to create. The built-in Rust numerical iterator (lazy list) uses this well: <kbd>(0..)</kbd>.</p>
+<p>Memoization is the last pattern that we will introduce here. It may be considered as more of an optimization than design pattern, but due to how common it is, we should mention it here. A memoized function only computes unique results once. A simple implementation would be a function guarded by a hash table. If the parameters and result are already in the hash table, then skip the function call and directly return the result from the hash table. Otherwise, compute the result, put it in the hash table, and return. This process can be implemented manually in any language, but Rust macros allow us to write the memoization code once, and reuse that code by applying this macro. This is shown using the following code snippet, in <kbd>intro_patterns.rs</kbd>:</p>
+<pre class="rust rust-example-rendered" style="padding-left: 30px"><span>#[macro_use] extern crate cached;<br/>#[macro_use] extern crate lazy_static;</span><br/><br/>cached! {<br/>    FIB;<br/>    fn fib(n: u64) -&gt; u64 = {<br/>        if n==0 || n==1 { return n }<br/>        fib(n-1) + fib(n-2)<br/>    }<br/>}<br/><br/><span class="s1">fn main()<br/></span><span class="s1">{<br/>   fib(30);<br/></span><span class="s1">}</span></pre>
+<p>This example makes use of two crates and many macros. We won't fully explain everything that is happening here until the very end of this book. There is much that is possible with macros and metaprogramming. Caching function results is just a start.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

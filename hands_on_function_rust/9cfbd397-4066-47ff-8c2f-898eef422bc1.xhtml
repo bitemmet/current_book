@@ -1,0 +1,48 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Printing summary</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Printing summary</h1>
+                </header>
+            
+            <article>
+                
+<p>To print our summary, we should include averages and standard deviations for location, velocity, and acceleration. Additionally, it may be interesting to see statistics for motor control, so let's also display voltage statistics. At this point, we realize that the data is not storing enough information to calculate average or standard deviation numbers.</p>
+<p>To calculate the average value for a variable, we will need to calculate a sum of each recorded value and record a count of how many data points we recorded. Then, we will calculate the average value by dividing the total value by the record count, giving us our estimation of the average value over time.</p>
+<p>To calculate the standard deviation, we will require a full record of each observed value of the variable. Additionally, the average value and record count are required. Then, we will use the following formula to calculate standard deviation:</p>
+<div class="CDPAlignCenter CDPAlign"><img class="fm-editor-equation" src="assets/3c852df4-1086-4609-bfd9-3bec0b76abb5.png" style="width:7.83em;height:3.33em;"/></div>
+<p>To store our data, we need to declare new variables before our loop starts:</p>
+<ol>
+<li>To store data using new variables, use the following code:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">let mut record_location = Vec::new();<br/></span><span class="s1">let mut record_velocity = Vec::new();<br/></span><span class="s1">let mut record_acceleration = Vec::new();<br/></span><span class="s1">let mut record_voltage = Vec::new();</span></pre>
+<ol start="2">
+<li>Then, at each iteration, before calculating the new values, we will store each data point:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">record_location.push(location);<br/></span><span class="s1">record_velocity.push(velocity);<br/></span><span class="s1">record_acceleration.push(acceleration);<br/></span><span class="s1">record_voltage.push(up_input_voltage-down_input_voltage);</span></pre>
+<ol start="3">
+<li>Finally, we calculate the statistics:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px">let record_location_N = record_location.len();<br/>let record_location_sum: f64 = record_location.iter().sum();<br/>let record_location_avg = record_location_sum / (record_location_N as f64);<br/>let record_location_dev = (<br/>   record_location.clone().into_iter()<br/>   .map(|v| (v - record_location_avg).powi(2))<br/>   .fold(0.0, |a, b| a+b)<br/>   / (record_location_N as f64)<br/>).sqrt();<br/><br/>let record_velocity_N = record_velocity.len();<br/>let record_velocity_sum: f64 = record_velocity.iter().sum();<br/>let record_velocity_avg = record_velocity_sum / (record_velocity_N as f64);<br/>let record_velocity_dev = (<br/>   record_velocity.clone().into_iter()<br/>   .map(|v| (v - record_velocity_avg).powi(2))<br/>   .fold(0.0, |a, b| a+b)<br/>   / (record_velocity_N as f64)<br/>).sqrt();<br/><span class="s1"><br/></span><span class="s1">let record_acceleration_N = record_acceleration.len();<br/></span><span class="s1">let record_acceleration_sum: f64 = record_acceleration.iter().sum()</span><span class="s1">;<br/></span><span class="s1">let record_acceleration_avg = record_acceleration_sum / (record_acceleration_N as f64);<br/></span><span class="s1">let record_acceleration_dev = (<br/></span><span class="s1">   record_acceleration.clone().into_iter()<br/></span><span class="s1">   .map(|v| (v - record_acceleration_avg).powi(2))<br/></span><span class="s1">   .fold(0.0, |a, b| a+b)<br/></span><span class="s1">   / (record_acceleration_N as f64)<br/></span><span class="s1">).sqrt();<br/><br/></span><span class="s1">let record_voltage_N = record_voltage.len();<br/></span><span class="s1">let record_voltage_sum = record_voltage.iter().sum()</span><span class="s1">;<br/></span><span class="s1">let record_voltage_avg = record_voltage_sum / (record_voltage_N as f64);<br/></span><span class="s1">let record_voltage_dev = (<br/></span><span class="s1">   record_voltage.clone().into_iter()<br/></span><span class="s1">   .map(|v| (v - record_voltage_avg).powi(2))<br/></span><span class="s1">   .fold(0.0, |a, b| a+b)<br/></span><span class="s1">   / (record_voltage_N as f64)<br/></span><span class="s1">).sqrt();</span></pre>
+<ol start="4">
+<li>Before exiting the program, we must print the statistics:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">write!(stdout, "{}{}{}", clear::All, cursor::Goto(1, 1), cursor::Show).unwrap();<br/><br/></span><span class="s1">write!(stdout, "Average of location <span class="Apple-converted-space">                </span>{:.6}\r\n", record_location_avg);<br/></span><span class="s1">write!(stdout, "Standard deviation of location<span class="Apple-converted-space">      </span>{:.6}\r\n", record_location_dev);<br/></span><span class="s1">write!(stdout, "\r\n");<br/><br/></span><span class="s1">write!(stdout, "Average of velocity <span class="Apple-converted-space">                </span>{:.6}\r\n", record_velocity_avg);<br/></span><span class="s1">write!(stdout, "Standard deviation of velocity<span class="Apple-converted-space">      </span>{:.6}\r\n", record_velocity_dev);<br/></span><span class="s1">write!(stdout, "\r\n");<br/><br/></span><span class="s1">write!(stdout, "Average of acceleration <span class="Apple-converted-space">            </span>{:.6}\r\n", record_acceleration_avg);<br/></span><span class="s1">write!(stdout, "Standard deviation of acceleration<span class="Apple-converted-space">  </span>{:.6}\r\n", record_acceleration_dev);<br/></span><span class="s1">write!(stdout, "\r\n");<br/><br/></span><span class="s1">write!(stdout, "Average of voltage<span class="Apple-converted-space">                  </span>{:.6}\r\n", record_voltage_avg);<br/></span><span class="s1">write!(stdout, "Standard deviation of voltage <span class="Apple-converted-space">      </span>{:.6}\r\n", record_voltage_dev);<br/></span><span class="s1">write!(stdout, "\r\n");<br/><br/></span><span class="s1">stdout.flush().unwrap();</span></pre>
+<p>Now, having assembled the pieces, we have a complete simulation. Running the program on a test input produces a nice graphic and result summary. This should be sufficient to accompany the initial proposal.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

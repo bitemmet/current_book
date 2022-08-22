@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the physics.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the physics.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The physics module has become much smaller. It now contains a few struct definitions and constants and the central <kbd>simulate_elevator</kbd> method. The result is as follows:</p>
+<pre style="padding-left: 30px">#[derive(Clone,Debug,Serialize,Deserialize)]<br/>pub struct ElevatorState {<br/>   pub timestamp: f64,<br/>   pub location: f64,<br/>   pub velocity: f64,<br/>   pub acceleration: f64,<br/>   pub motor_input: f64<br/>}<br/><br/>pub const MAX_JERK: f64 = 0.2;<br/>pub const MAX_ACCELERATION: f64 = 2.0;<br/>pub const MAX_VELOCITY: f64 = 5.0;<br/><br/>pub fn simulate_elevator(esp: Box&lt;Building&gt;, est: ElevatorState, floor_requests: &amp;mut Box&lt;RequestQueue&gt;,<br/>                         mc: &amp;mut Box&lt;MotionController&gt;, dr: &amp;mut Box&lt;DataRecorder&gt;)<br/>{<br/>   //immutable input becomes mutable local state<br/>   let mut esp = esp.clone();<br/>   let mut est = est.clone();<br/><br/>   //initialize MotorController and DataController<br/>   mc.init(esp.clone(), est.clone());<br/>   dr.init(esp.clone(), est.clone());<br/><br/>   //5. Loop while there are remaining floor requests<br/>   let original_ts = Instant::now();<br/>   thread::sleep(time::Duration::from_millis(1));<br/>   let mut next_floor = floor_requests.pop_request();<br/>   while let Some(dst) = next_floor<br/>   {<br/>      //5.1. Update location, velocity, and acceleration<br/>      let now = Instant::now();<br/>      let ts = now.duration_since(original_ts)<br/>                  .as_fractional_secs();<br/>      let dt = ts - est.timestamp;<br/>      est.timestamp = ts;<br/><br/>      est.location = est.location + est.velocity * dt;<br/>      est.velocity = est.velocity + est.acceleration * dt;<br/>      est.acceleration = {<br/>         let F = est.motor_input;<br/>         let m = esp.get_carriage_weight();<br/>         -9.8 + F/m<br/>      };<br/><br/>      //5.2. If next floor request in queue is satisfied, then remove from queue<br/>      if (est.location - getCumulativeFloorHeight(esp.get_floor_heights(), dst)).abs() &lt; 0.01 &amp;&amp;<br/>         est.velocity.abs() &lt; 0.01<br/>      {<br/>         est.velocity = 0.0;<br/>         next_floor = floor_requests.pop_request();<br/>      }<br/><br/>      //5.4. Print realtime statistics<br/>      dr.poll(est.clone(), dst);<br/><br/>      //5.3. Adjust motor control to process next floor request<br/>      est.motor_input = mc.poll(est.clone(), dst);<br/><br/>      thread::sleep(time::Duration::from_millis(1));<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

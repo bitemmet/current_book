@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the elevator_drivers.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the elevator_drivers.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The elevator drivers module should interface with the static libraries provided and additionally provide a common interface to all elevator drivers. The code looks like the following:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use libc::c_int;<br/><br/></span><span class="s1">#[link(name = "elevator1")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn elevator1_poll_floor_request() -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">#[link(name = "elevator2")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn elevator2_poll_floor_request() -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">#[link(name = "elevator3")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn elevator3_poll_floor_request() -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub trait ElevatorDriver<br/></span><span class="s1">{<br/></span><span class="s1">   fn poll_floor_request(&amp;self) -&gt; Option&lt;u64&gt;;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub struct ElevatorDriver1;<br/></span><span class="s1">impl ElevatorDriver for ElevatorDriver1<br/></span><span class="s1">{<br/></span><span class="s1">   fn poll_floor_request(&amp;self) -&gt; Option&lt;u64&gt;<br/></span><span class="s1">   {<br/></span><span class="s1">      unsafe {<br/></span><span class="s1">         let req = elevator1_poll_floor_request();<br/></span><span class="s1">         if req &gt; 0 {<br/></span><span class="s1">            Some(req as u64)<br/></span><span class="s1">         } else {<br/></span><span class="s1">            None<br/></span><span class="s1">         }<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">//Elevator Driver 2<br/><br/></span>//Elevator Driver 3</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

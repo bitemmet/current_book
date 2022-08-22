@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Inspecting the foreign library tests</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Inspecting the foreign library tests</h1>
+                </header>
+            
+            <article>
+                
+<p>The previous team seemed very confident in the library subsystem that they developed; however, they found Rust code difficult to work with. The tests make this problem apparent. Two test sets seem to support the notion that the library works as intended, but the Rust components fail in edge cases. It will be your responsibility to pick up the pieces and salvage the project.</p>
+<p>Looking at the library tests in <kbd>src/tests/magic.rs</kbd>, the intended behavior is as follows:</p>
+<ul>
+<li>Override codes are issued to the subsystem through either elevator control panel or from the software directly</li>
+<li>Status information and authorization sessions are accessed through the <kbd>poll</kbd> functions</li>
+<li>Authorization sessions must be freed before others can authorize</li>
+<li>In override mode, privileged commands may be issued, such as:
+<ul>
+<li>Change elevator to manual operation</li>
+<li>Use elevator display panel to communicate</li>
+</ul>
+</li>
+<li>Privileged commands may not be issued without an active session</li>
+</ul>
+<p>All library tests are passing, confirming the correct behavior of the library under the limited conditions tested. It should also be noted that the library is a bit obtuse in how it handles state, events, and sessions. These patterns are common in linked libraries, but to see the pattern, let's look at the resulting code in Rust.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

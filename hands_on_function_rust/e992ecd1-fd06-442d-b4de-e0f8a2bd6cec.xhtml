@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Accessing status information and sessions</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Accessing status information and sessions</h1>
+                </header>
+            
+            <article>
+                
+<p class="mce-root">These tests confirm that authorizing sessions and releasing sessions works correctly:</p>
+<pre>#[test]<br/>fn authorize_override_success() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(1);<br/>      let session = magic::poll_override_session();<br/>      assert!(session != (0 as *const c_void));<br/>      magic::free_override_session(session);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}<br/><br/>#[test]<br/>fn authorize_privileged_success() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(2);<br/>      let session = magic::poll_physical_override_privileged_session();<br/>      assert!(session != (0 as *const c_void));<br/>      magic::free_override_session(session);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}<br/><br/>#[test]<br/>fn authorize_admin_success() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(3);<br/>      let session = magic::poll_physical_override_admin_session();<br/>      assert!(session != (0 as *const c_void));<br/>      magic::free_override_session(session);<br/>      assert!(magic::poll_override_error() == 0);<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

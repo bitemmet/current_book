@@ -1,0 +1,45 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Using pure functions</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Using pure functions</h1>
+                </header>
+            
+            <article>
+                
+<p>Pure functions are the second technique that we recommend to prevent hard-to-reproduce bugs. Pure functions can be thought of as an extension of the avoid side-effects principle. The definition of a pure function is a function where the following is true:</p>
+<ul>
+<li>No changes are caused outside of the function (no side-effects)</li>
+<li>The return value does not depend on anything but the function parameters</li>
+</ul>
+<p>Here are some examples of pure functions:</p>
+<pre>fn p0() {}<br/><br/>fn p1() -&gt; u64 {<br/>   444<br/>}<br/><br/>fn p2(x: u64) -&gt; u64 {<br/>   x * 444<br/>}<br/><br/>fn p3(x: u64, y: u64) -&gt; u64 {<br/>   x * 444 + y<br/>}<br/><br/>fn main()<br/>{<br/>   p0();<br/>   p1();<br/>   p2(3);<br/>   p3(3,4);<br/>}</pre>
+<p>Here are some examples of impure functions:</p>
+<pre>use std::cell::Cell;<br/><br/>static mut blah: u64 = 3;<br/>fn ip0() {<br/>   unsafe {<br/>      blah = 444;<br/>   }<br/>}<br/><br/>fn ip1(c: &amp;Cell&lt;u64&gt;) {<br/>   c.set(333);<br/>}<br/><br/>fn main()<br/>{<br/>   ip0();<br/>   let r = Cell::new(3);<br/>   ip1(&amp;r);<br/>   ip1(&amp;r);<br/>}</pre>
+<p>Rust does not have any language feature that specifically designates a function as more or less pure. However, as the preceding examples illustrate, Rust somewhat discourages impure functions. Function purity should be regarded as a design pattern and is strongly associated with the good functional style.</p>
+<p>Closures can also be pure or impure in the same fashion as top-level functions. As such, function purity becomes a concern when working with higher-level functions. Certain patterns of functional programming expect functions to be pure. A good example is the memoization pattern that we briefly mentioned in <a href="9221248a-8815-4394-8042-b2b5bb10cd5e.xhtml">Chapter 1</a>, <em>Functional Programming – a Comparison</em>. Let's compare what can happen to memoization if the memoized function is impure.</p>
+<p>First, here is a reminder of how memoization is supposed to work:</p>
+<pre>#[macro_use] extern crate cached;<br/><br/>cached!{<br/>   FIB;<br/>   fn fib(n: u64) -&gt; u64 = {<br/>      if n == 0 || n == 1 { return n }<br/>      fib(n-1) + fib(n-2)<br/>   }<br/>}<br/><br/>fn main() {<br/>   fib(30); //call 1, generates correct value and returns it<br/>   fib(30); //call 2, finds correct value and returns it<br/>}</pre>
+<p>Next, let's look at a memoized impure function:</p>
+<pre>#[macro_use] extern crate lazy_static;<br/>#[macro_use] extern crate cached;<br/>use std::collections::HashMap;<br/>use std::sync::Mutex;<br/><br/>lazy_static! {<br/>   static ref BUCKET_COUNTER: Mutex&lt;HashMap&lt;u64, u64&gt;&gt; = {<br/>      Mutex::new(HashMap::new())<br/>   };<br/>}<br/><br/>cached!{<br/>   BUCK;<br/>   fn bucket_count(n: u64) -&gt; u64 = {<br/>      let mut counter = BUCKET_COUNTER.lock().unwrap();<br/>      let r = match counter.get(&amp;n) {<br/>         Some(c) =&gt; { c+1 }<br/>         None =&gt; { 1 }<br/>      };<br/>      counter.insert(n, r);<br/>      r<br/>   }<br/>}<br/><br/>fn main() {<br/>   bucket_count(30); //call 1, generates correct value and returns it<br/>   bucket_count(30); //call 2, finds stale value and returns it<br/>} </pre>
+<p>This first cache example should return the same value every time. The second example should not return the same value every time. Semantically, we don't want the second example to return stale values; however, this also means that we cannot safely cache the results. There is a necessary performance trade-off. There is nothing wrong with the purity or impurity of either example here if it is necessary. It just means that the second example should not be cached.</p>
+<p>However, there are also anti-patterns of impurity. Let's look at another impure function that behaves poorly:</p>
+<pre>#[macro_use] extern crate cached;<br/>use std::sync::{Arc,Mutex};<br/><br/>#[derive(Clone)]<br/>pub struct TimeBomb {<br/>   countdown: Arc&lt;Mutex&lt;i32&gt;&gt;<br/>}<br/><br/>impl Drop for TimeBomb<br/>{<br/>   fn drop(&amp;mut self) {<br/>      let mut c = self.countdown.lock().unwrap();<br/>      *c -= 1;<br/>      if *c &lt;= 0 {<br/>         panic!("BOOM!!")<br/>      }<br/>   }<br/>}<br/><br/>cached!{<br/>   TICKING_BOX;<br/>   fn tick_tock(v: i32) -&gt; TimeBomb = {<br/>      TimeBomb {<br/>         countdown: Arc::new(Mutex::new(v))<br/>      }<br/>   }<br/>}<br/><br/>fn main() {<br/>   tick_tock(3);<br/>   tick_tock(3);<br/>   tick_tock(3);<br/>}</pre>
+<p>In this example, the data itself is impure. Every <kbd>tick_tock</kbd> moves and drops a <kbd>TimeBomb</kbd>. Eventually, it explodes and our cache doesn't help to protect us. Hopefully, you won't need to work with bombshells in your programs.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,42 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Breaking down long segments into components</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Breaking down long segments into components</h1>
+                </header>
+            
+            <article>
+                
+<p>Once the project is functional, we can begin to look for opportunities to simplify the design and eliminate redundancies. The first step here should be to look for patterns of similar code. Our summary statistics are a very good example of code that should be cleaned up. We have four variables that we track and display statistics for. The calculation of each statistic is identical, yet we repeat the calculation explicitly for each variable. There are also similarities in the output formatting, so let's also clean that up.</p>
+<p>To fix redundancy, the first question to ask is whether the code can be rewritten as a function. Here, we do have the opportunity to use this pattern by creating a function that accepts the variable data and prints the summary. This is done as follows:</p>
+<ol>
+<li>We can write this function, which is shown as follows:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">fn variable_summary&lt;W: Write&gt;(stdout: &amp;mut raw::RawTerminal&lt;W&gt;, vname: &amp;str, data: Vec&lt;f64&gt;)<br/>{<br/></span><span class="s1">   //calculate statistics<br/></span><span class="s1">   let N = data.len();<br/></span><span class="s1">   let sum: f64 = data.iter().sum();</span><span class="s1"><br/></span><span class="s1">   let avg = sum / (N as f64);<br/></span><span class="s1">   let dev = (<br/></span><span class="s1">      data.clone().into_iter()<br/></span><span class="s1">      .map(|v| (v - avg).powi(2))<br/></span><span class="s1">      .fold(0.0, |a, b| a+b)<br/></span><span class="s1">      / (N as f64)<br/></span><span class="s1">   ).sqrt();<br/><br/></span><span class="s1">   //print formatted output<br/></span><span class="s1">   write!(stdout, "Average of {:25}{:.6}\r\n", vname, avg);<br/></span><span class="s1">   write!(stdout, "Standard deviation of {:14}{:.6}\r\n", vname, dev);<br/></span><span class="s1">   write!(stdout, "\r\n");<br/></span><span class="s1">}</span></pre>
+<ol start="2">
+<li>To call the function, we provide each <kbd>name</kbd> and <kbd>data</kbd> variable:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">write!(stdout, "{}{}{}", clear::All, cursor::Goto(1, 1), cursor::Show).unwrap();<br/></span><span class="s1">variable_summary(&amp;mut stdout, "location", record_location);<br/></span><span class="s1">variable_summary(&amp;mut stdout, "velocity", record_velocity);<br/></span><span class="s1">variable_summary(&amp;mut stdout, "acceleration", record_acceleration);<br/></span><span class="s1">variable_summary(&amp;mut stdout, "voltage", record_voltage);<br/></span><span class="s1">stdout.flush().unwrap();</span></pre>
+<p>This rewrite improves the program in two significant ways:</p>
+<ul>
+<li>The statistics calculation is much easier to read and debug</li>
+<li>Using the statistics and summary function involves very little redundancy, which reduces the likelihood of accidentally using incorrect variable names or other common errors</li>
+</ul>
+<p>Short, literate code is robust and prevents mistakes. Long, redundant code is brittle and error-prone.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

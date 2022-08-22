@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Polynomial growth</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Polynomial growth</h1>
+                </header>
+            
+            <article>
+                
+<p>Most algorithms are polynomial.</p>
+<p>If you have one <kbd>for</kbd> loop, then your complexity is <em>O</em>(<em>n</em>). This is shown in the following code:</p>
+<pre class="p1"><span class="s1">fn main() {<br/></span><span class="s1">   for _ in 0..1000 {<br/></span><span class="s1">      //O(n)<br/></span><span class="s1">      //n = 1000<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>If you have two <kbd>for</kbd> loops, then your complexity is <em>O</em>(<em>n</em><sup>2</sup>):</p>
+<pre class="p1"><span class="s1">fn main() {<br/></span><span class="s1">   for _ in 0..1000 {<br/></span><span class="s1">      for _ in 0..1000 {<br/></span><span class="s1">         //O(n^2)<br/></span><span class="s1">         //n = 1000<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>Higher polynomials are somewhat less common. Sometimes code accidentally becomes a higher polynomial, which you should be careful about; otherwise, let's just consider both the previous cases.</p>
+<p>Linear complexity is very common. Any time you process the entirety of data in a collection, the complexity will be linear. The running time of a linear algorithm will be approximately the number of items (<em>n</em>) processed, multiplied by the time to process individual items (<em>c</em>). If you want to make a linear algorithm go faster, you need to:</p>
+<ul>
+<li>Reduce the number of items processed (n)</li>
+<li>Reduce the constant time associated with processing an item (<em>c</em>)</li>
+</ul>
+<p>If the time to process an item is not constant or approximately constant, then your overall time complexity is now recursively dependent on that processing time. This is shown with the following code:</p>
+<pre class="p1"><span class="s1">fn a(n: u64) {<br/></span><span class="s1">   //Is this O(n)?<br/></span><span class="s1">   for _ in 0..n {<br/></span><span class="s1">      b(n)<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn b(n: u64) {<br/></span><span class="s1">   //Is this O(n)?<br/></span><span class="s1">   for _ in 0..n {<br/></span><span class="s1">      c(n)<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/>fn c(n: u64) {<br/></span><span class="s1">   //This is O(n)<br/></span><span class="s1">   for _ in 0..n {<br/></span><span class="s1">      let _ = 1 + 1;<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   //What time complexity is this?<br/></span><span class="s1">   a(1000)<br/></span><span class="s1">}</span></pre>
+<p>Higher polynomial complexity is also common but may indicate that your algorithm is poorly designed. In the preceding description, we mentioned that the linear processing time can become dependent on the time to process individual items. If your program is designed carelessly, then it is very easy to string together three or four linear algorithms and unintentionally create an <em>O</em>(<em>n</em><sup>4</sup>) monster.</p>
+<p>Higher polynomials are proportionally slower. In the case of algorithms that naively require high polynomial calculations, it is often the case that the algorithm can be pruned to remove calculations that are redundant or entirely unnecessary. Consider the following code:</p>
+<pre class="p1"><span class="s1">extern crate rusty_machine;<br/></span><span class="s1">use rusty_machine::linalg::{Matrix,Vector};<br/></span><span class="s1">use rusty_machine::learning::gp::{GaussianProcess,ConstMean};<br/></span><span class="s1">use rusty_machine::learning::toolkit::kernel;<br/></span><span class="s1">use rusty_machine::learning::SupModel;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let inputs = Matrix::new(3,3,vec![1.1,1.2,1.3,2.1,2.2,2.3,3.1,3.2,3.3]);<br/></span><span class="s1">   let targets = Vector::new(vec![0.1,0.8,0.3]);<br/></span><span class="s1">   let test_inputs = Matrix::new(2,3, vec![1.2,1.3,1.4,2.2,2.3,2.4]);<br/></span><span class="s1">   let ker = kernel::SquaredExp::new(2., 1.);<br/></span><span class="s1">   let zero_mean = ConstMean::default();<br/></span><span class="s1">   let mut gp = GaussianProcess::new(ker, zero_mean, 0.5);<br/><br/></span><span class="s1">   gp.train(&amp;inputs, &amp;targets).unwrap();<br/></span><span class="s1">   let _ = gp.predict(&amp;test_inputs).unwrap();<br/></span><span class="s1">}</span></pre>
+<p>When you need to use higher polynomial algorithms, use a library! This stuff gets complicated fast and improving these algorithms is the main job of academic Computer Scientists. If you are performance-tuning a common algorithm and not expecting to publish your results, then you may likely be duplicating work.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

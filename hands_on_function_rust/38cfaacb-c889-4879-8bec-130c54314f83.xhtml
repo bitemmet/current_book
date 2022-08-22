@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Fixing the hard-to-reproduce bug</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Fixing the hard-to-reproduce bug</h1>
+                </header>
+            
+            <article>
+                
+<p>After way too much searching and researching, you find a test case that reliably reproduces the problem:</p>
+<pre>#[test]<br/>fn invalid_deauthorization() {<br/>   admin::reset_state();<br/>   let session = admin::authorize_admin().ok();<br/>   assert!(admin::authorize_admin().is_err());<br/>   assert!(admin::is_admin());<br/>}</pre>
+<p>Looking at this test case, the first thing we might ask is, why should this be permitted?</p>
+<p>The problem that we encountered during physical testing was characterized by the random deauthorization of valid sessions. What was discovered during investigations was that during physically authorized sessions, sometimes software authorized sessions would be initiated. A physical authorization is when someone uses a key on the elevator to use special commands. Software authorization is any other authorized session initiated from the running software, rather than from the elevator hardware. This double authorization action violated the double authorization constraint, so both sessions were invalidated. The resolution is clearly to permit the first authorized session to continue, while rejecting the second authorization.</p>
+<p>The solution seems fairly direct and straightforward. From <kbd>src/admin.rs</kbd>, we have the ability to check whether any session is authorized from the library, then reject the second authorization without calling the library.</p>
+<p>So, rewriting the authorize commands, we add a check to see whether there is already an authorized session. If such a session exists, then this authorization fails:</p>
+<pre>pub fn authorize_override() -&gt; Result&lt;AuthorizedSession,ErrorCode&gt;<br/>{<br/>   if is_override() || is_privileged() || is_admin() {<br/>      return Result::Err(ErrorCode::DoubleAuthorize)<br/>   }<br/>   let session = unsafe {<br/>      magic::issue_override_code(OverrideCode::IssueOverride as i32);<br/>      magic::poll_override_session()<br/>   };<br/>   let session = AuthorizedSession {<br/>      session: Rc::new(AuthorizedSessionInner(session))<br/>   };<br/>   check_error(session)<br/>}<br/><br/>pub fn authorize_privileged() -&gt; Result&lt;AuthorizedSession,ErrorCode&gt;<br/>{ ... }<br/><br/>pub fn authorize_admin() -&gt; Result&lt;AuthorizedSession,ErrorCode&gt;<br/>{ ... }</pre>
+<p>This change fixes the immediate problem, but causes the double free tests to fail, because now there is no error code generated from the library after double free. We are essentially protecting the underlying library from double free responsibility, so this is a foreseeable consequence. The new tests just remove the last line that previously checked for the error code:</p>
+<pre>#[test]<br/>fn double_override_failure() {<br/>   admin::reset_state();<br/>   let session = admin::authorize_override().ok();<br/>   assert!(admin::authorize_override().err().is_some());<br/>}<br/><br/>#[test]<br/>fn double_privileged_failure() {<br/>   admin::reset_state();<br/>   let session = admin::authorize_privileged().ok();<br/>   assert!(admin::authorize_privileged().err().is_some());<br/>}<br/><br/>#[test]<br/>fn double_admin_failure() {<br/>   admin::reset_state();<br/>   let session = admin::authorize_admin().ok();<br/>   assert!(admin::authorize_admin().err().is_some());<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

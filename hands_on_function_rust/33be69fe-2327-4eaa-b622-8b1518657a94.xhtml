@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Using the heartbeat pattern for long running processes</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Using the heartbeat pattern for long running processes</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">When you want to create a long running process, it is nice to be able to recover from program errors that crash or terminate the process. Perhaps the process runs out of stack space or encounters a <kbd>panic!</kbd> from some code path. For any number of reasons, a process might get terminated and will need to be restarted.</span></p>
+<p class="p1"><span class="s1">To accommodate this desire, there are many tools that will watch a program for you and restart it if it dies or stops responding to health checks. Here, we recommend a completely self-contained version of this pattern that is based on Rust concurrency.</span></p>
+<p class="p1"><span class="s1">The goal is to create a parent process that acts as a monitor and oversees one or more workers. The process tree should look something like this:</span></p>
+<pre class="p1"><span class="s1">parent<br/></span><span class="s1"> —- child 1<br/></span><span class="s1"> —- child 2<br/></span><span class="s1"> —- child 3</span></pre>
+<p class="p1"><span class="s1">When a child dies or stops responding to health checks, the parent should kill or otherwise clean up the process resources, then start a new process to replace it. Here is an example of this behavior, starting with a subprocess that sometimes dies:</span></p>
+<pre class="p1"><span class="s1">use std::{thread,time,process};<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let life_expectancy = process::id() % 8;<br/></span><span class="s1">   let t = time::Duration::from_millis(1000);<br/></span><span class="s1">   for _ in 0..life_expectancy {<br/></span><span class="s1">      thread::sleep(t);<br/></span><span class="s1">   }<br/></span><span class="s1">   println!("process {} dies unexpectedly.", process::id());<br/></span><span class="s1">}</span></pre>
+<p>This worker process is highly unreliable and lives no longer than eight seconds. However, if we wrap it with a heartbeat monitor, then we can make it more reliable:</p>
+<pre class="p1"><span class="s1">use std::process::Command;<br/></span><span class="s1">use std::env::current_exe;<br/></span><span class="s1">use std::{thread,time};<br/><br/></span><span class="s1">fn main() {<br/>   //There is an executable called debugging_buggy_worker<br/>   //it crashes a lot but we still want to run it<br/></span><span class="s1">   let path = current_exe()<br/></span><span class="s1">             .expect("could not find current executable");<br/></span><span class="s1">   let path = path.with_file_name("debugging_buggy_worker");<br/></span><span class="s1">   let mut children = Vec::new();<br/><br/>   //we start 3 workers<br/></span><span class="s1">   for _ in 0..3 {<br/></span><span class="s1">      children.push(<br/></span><span class="s1">         Command::new(path.as_os_str())<br/></span><span class="s1">                 .spawn()<br/></span><span class="s1"><span class="Apple-converted-space">                 </span>.expect("failed to spawn child")<br/></span><span class="s1">      );<br/></span><span class="s1">   }<br/><br/>   //those workers will randomly die because they are buggy<br/>   //so after they die, we restart a new process to replace them<br/></span><span class="s1"><span class="Apple-converted-space">   </span>let t = time::Duration::from_millis(1000);<br/></span><span class="s1">   loop {<br/></span><span class="s1">      thread::sleep(t);<br/></span><span class="s1">      for ci in 0..children.len() {<br/></span><span class="s1">         let is_dead = children[ci].try_wait().expect("failed to try_wait");<br/></span><span class="s1">         if let Some(_exit_code) = is_dead {<br/></span><span class="s1">            children[ci] = Command::new(path.as_os_str())<br/></span><span class="s1">                                   .spawn()<br/></span><span class="s1">                                   .expect("failed to spawn child");<br/></span><span class="s1">            println!("starting a new process from parent.");<br/></span><span class="s1">         }<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>Now, the running processes will get restarted if they die unexpectedly. Optionally, the parent can check the health status of each child process and restart unresponsive workers.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

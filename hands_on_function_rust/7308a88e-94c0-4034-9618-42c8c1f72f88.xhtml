@@ -1,0 +1,42 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Updating location, velocity, and acceleration</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Updating location, velocity, and acceleration</h1>
+                </header>
+            
+            <article>
+                
+<p>Here, we need to update the program's state to reflect physical changes in the state variables since the previous loop iteration. All of these changes depend on knowledge of how much time has elapsed since the previous iteration, but we don't have that information store. So, let's make some small changes to our code.</p>
+<ol>
+<li>Store a timestamp of the previous iteration outside of the loop:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">let mut prev_loop_time = Instant::now();</span></pre>
+<ol start="2">
+<li>Calculate the elapsed time, then overwrite the previous timestamp:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">let now = Instant::now();<br/></span><span class="s1">let dt = now.duration_since(prev_loop_time)<br/></span><span class="s1">            .as_fractional_secs();<br/></span><span class="s1">prev_loop_time = now;</span></pre>
+<ol start="3">
+<li>To improve accuracy, sleep for a while at the end of the loop (it is difficult to accurately record sub-millisecond measurements):</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">thread::sleep(time::Duration::from_millis(10));</span></pre>
+<p>Now, we can start to calculate the new location, velocity, and acceleration. The location is calculated as previous location plus velocity over time. Velocity is calculated as previous velocity plus acceleration over time. Acceleration is calculated as <em>F=ma</em> and will be calculated from the motor force and carriage weight. At this point, we realize that carriage weight is not specified in the input file, but after some discussion, the team decides to use a standard carriage weight rather than change the input format.</p>
+<p>With a little research, you find that an elevator carriage weighs about 1,200 kg. Similarly, you estimate that a simple DC motor can produce roughly eight newtons of force per volt. The resulting code looks like the following:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">location = location + velocity * dt;<br/></span><span class="s1">velocity = velocity + acceleration * dt;<br/></span><span class="s1">acceleration = {<br/></span><span class="s1">   let F = (up_input_voltage - down_input_voltage) * 8.0;<br/></span><span class="s1">   let m = 1200000.0;<br/>   //-9.8 is an approximation of acceleration due to gravity<br/></span><span class="s1">   -9.8 + F/m<br/></span><span class="s1">};</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

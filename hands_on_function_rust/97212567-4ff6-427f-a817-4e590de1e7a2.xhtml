@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Constanting no growth</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Constanting no growth</h1>
+                </header>
+            
+            <article>
+                
+<p>Constant time operations are the indivisible units of runtime performance. In the previous section, we provided a table of common operations and how long each one takes. These are, for our purposes as programmers, basically physical constants. You can't optimize the speed of light to make it go faster.</p>
+<p>Not all constant time operations are irreducible, however. If you have a procedure that does a fixed number of operations on fixed-size data, then it will be constant time. That does not mean that the procedure is automatically efficient. When trying to optimize constant time procedures, ask yourself these two questions:</p>
+<ul>
+<li>Can any of the work be avoided?</li>
+<li>Is the fridge too far from the computer?</li>
+</ul>
+<p>Here is a program consisting of emphasizing constant time operations:</p>
+<pre class="p1"><span class="s1">fn allocate() -&gt; [u64; 1000] {<br/></span><span class="s1">   [22; 1000]<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn flop(x: f64, y: f64) -&gt; f64 {<br/></span><span class="s1">   x * y<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn lookup(x: &amp;[u64; 1000]) -&gt; u64 {<br/></span><span class="s1">   x[234] * x[345]<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let mut data = allocate();<br/></span><span class="s1">   for _ in 0..1000 {<br/></span><span class="s1">      //constant size memory allocation<br/></span><span class="s1">      data = allocate();<br/></span><span class="s1">   }<br/><br/></span><span class="s1">   for _ in 0..1000000 {<br/></span><span class="s1">      //reference data<br/></span><span class="s1">      lookup(&amp;data);<br/></span><span class="s1">   }<br/><br/></span><span class="s1">   for _ in 0..1000000 {<br/></span><span class="s1">      //floating point operation<br/></span><span class="s1">      flop(2.0, 3.0);<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>Then, let's profile this program:</p>
+<pre class="p1"><strong><span class="s1">Profiling </span><span class="s2">performance_constant with callgrind...<br/><br/></span><span class="s2">Total Instructions</span><span class="s3">...896,049,080<br/><br/></span><span class="s2">217,133,740 (</span><span class="s4">24.2%</span><span class="s2">) ???:_platform_memmove$VARIANT$Haswell<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">108,054,000 (</span><span class="s4">12.1%</span><span class="s2">) ???:core::ptr<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">102,051,069 (</span><span class="s4">11.4%</span><span class="s2">) ???:core::iter::range<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">76,038,000 (</span><span class="s4">8.5%</span><span class="s2">) ???:&lt;i32<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">56,028,000 (</span><span class="s4">6.3%</span><span class="s2">) ???:core::ptr<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">46,023,000 (</span><span class="s4">5.1%</span><span class="s2">) ???:core::iter::range::ptr_try_from_impls<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">45,027,072 (</span><span class="s4">5.0%</span><span class="s2">) ???:performance_constant<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">44,022,000 (</span><span class="s4">4.9%</span><span class="s2">) ???:core::ptr<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">40,020,000 (</span><span class="s4">4.5%</span><span class="s2">) ???:core::mem<br/></span><span class="s2">-----------------------------------------------------------<br/></span><span class="s2">30,015,045 (</span><span class="s4">3.3%</span><span class="s2">) ???:core::cmp::impls</span></strong></pre>
+<p>We see that the heavy memory allocation is fairly expensive. As for the memory access and floating point calculation, it is seemingly overwhelmed by the expense of the loop that executes them multiple times. Unless there is a clear culprit for poor performance in a constant time procedure, then optimizing this code may not be straightforward.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,62 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Performance, Debugging, and Metaprogramming</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Performance, Debugging, and Metaprogramming</h1>
+                </header>
+            
+            <article>
+                
+<ol>
+<li>How is release mode different from debug mode?</li>
+</ol>
+<p style="padding-left: 60px">That depends on your Cargo configuration. By default, there are several compiler flags that have different default values in release versus debug mode. One such flag is the opt-level that gets sent to the llvm code generation—the default debug opt-level is 2, and the default release opt-level is 3. These defaults can be changed in <kbd>Cargo.toml</kbd>.</p>
+<ol start="2">
+<li>How long will an empty loop take to run?</li>
+</ol>
+<p style="padding-left: 60px">Test it out. Otherwise, it is hard to say for sure on every platform. loop will always be an infinite loop. while true should maybe also be an infinite loop, but will generate a warning. <kbd>for _ in 0..99999999 {}</kbd> will be removed at opt-level 3 but not opt-level 2.</p>
+<ol start="3">
+<li>What is linear time in Big <em>O</em> notation?</li>
+</ol>
+<p style="padding-left: 60px">Linear time is <em>O</em>(<em>n</em>) time.</p>
+<ol start="4">
+<li>Name a function that grows faster than exponential growth.</li>
+</ol>
+<p style="padding-left: 60px">Factorial <em>O</em>(<em>n</em>!) grows faster than exponential growth.</p>
+<ol start="5">
+<li> What is faster, a disk read or a network read?</li>
+</ol>
+<p style="padding-left: 60px">Measure it. There are many physical factors to consider here.</p>
+<ol start="6">
+<li>How would you return a Result with multiple error conditions?</li>
+</ol>
+<p style="padding-left: 60px">Rust recommends using enum types to describe multiple error conditions. Being lazy, you could also use the <kbd>std::any::Any</kbd> type.</p>
+<ol start="7">
+<li>What is a token tree?</li>
+</ol>
+<p style="padding-left: 60px">A token tree is a tree data structure containing tokens. As a result of Rust lexing, (...), [...], and {...} token groups will become their own branches.</p>
+<ol start="8">
+<li>What is an Abstract Syntax Tree?</li>
+</ol>
+<p style="padding-left: 60px">An abstract syntax tree is like a token tree but it has a strict structure such that only well-formed (Rust) code can be represented by it.</p>
+<ol start="9">
+<li>Why do procedural macros need to be compiled separately?</li>
+</ol>
+<p style="padding-left: 60px">Procedural macros are written with normal Rust code. To be used in compilation, procedural macros need to have already been compiled.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

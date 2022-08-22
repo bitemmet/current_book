@@ -1,0 +1,32 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Defining lifetimes on generic types</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Defining lifetimes on generic types</h1>
+                </header>
+            
+            <article>
+                
+<p>Declaring lifetimes on generic types requires one additional consideration. All generic types that have a specified lifetime must be parameterized as having that lifetime. The parameter declaration must be compatible with how the parameter is used.</p>
+<p>Here is an example that will fail:</p>
+<pre style="padding-left: 30px"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Ref</span></span><span>&lt;</span><span class="hljs-symbol">'a</span><span>, T&gt;(&amp;</span><span class="hljs-symbol">'a</span> <span>T);</span></pre>
+<p>The struct definition uses the parameter <kbd>T</kbd> having a lifetime of <kbd>'a</kbd>; however, the parameter <kbd>T</kbd> is not required to have a lifetime compatible with <kbd>'a</kbd>.  The parameter <kbd>T</kbd> must be constrained by its own lifetime. By doing this, the code becomes as follows:</p>
+<pre style="padding-left: 30px"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Ref</span></span><span>&lt;</span><span class="hljs-symbol">'a</span><span>, T: </span><span class="hljs-symbol">'a</span><span>&gt;(&amp;</span><span class="hljs-symbol">'a</span><span> T);</span></pre>
+<p>Now that the parameter <kbd>T</kbd> has an explicit bound compatible with <kbd>'a</kbd>, the code will compile.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,83 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Putting the fridge next to the computer</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Putting the fridge next to the computer</h1>
+                </header>
+            
+            <article>
+                
+<p>If you take a snack break while coding, then it would be convenient to have a fridge and microwave next to the computer. If you travel to the kitchen for a snack, then it will take a little longer to satisfy your appetite. If your kitchen is empty and you need to make a grocery run, then the break is even further extended. If your grocery store is empty and you need to drive to a farm to harvest vegetables, then your work environment is clearly not designed for snacking purposes.</p>
+<p>This strange analogy illustrates the necessary trade-off between time and space. This relation is not quite a physical law for our purposes, but almost. The rule is that traveling, or communicating, over longer distances is directly proportional to time spent. More distance (d) in one direction also means an increase in available space of quadratic (d<sup>2</sup>) or cubic (d<sup>3</sup>) scale. In other words building the fridge farther away provides more space for a larger fridge.</p>
+<p>Bringing this story back to a technical context, here are some latency numbers that every programmer should know (~2012: <a href="https://gist.github.com/jboner/2841832">https://gist.github.com/jboner/2841832</a>):</p>
+<table border="1" style="border-collapse: collapse;width: 100%">
+<tbody>
+<tr>
+<td style="width: 585px"><strong>Request</strong></td>
+<td style="width: 146px"><strong>Time</strong></td>
+</tr>
+<tr>
+<td style="width: 585px">L1 cache reference</td>
+<td style="width: 146px">0.5 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">Branch mispredict</td>
+<td style="width: 146px">5 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">L2 cache reference</td>
+<td style="width: 146px">7 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">Mutex lock/unlock</td>
+<td style="width: 146px">25 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">Main memory reference</td>
+<td style="width: 146px">100 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">Compress 1 Kb with Zippy</td>
+<td style="width: 146px">3000 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">Send 1 Kb over 1 Gbps network</td>
+<td style="width: 146px">10000 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">Read 4 Kb randomly from SSD</td>
+<td style="width: 146px">150000 ns</td>
+</tr>
+<tr>
+<td style="width: 585px">Read 1 Mb sequentially from memory</td>
+<td style="width: 146px">250000 ns</td>
+</tr>
+<tr>
+<td style="width: 585px"><span>Round trip within same datacenter</span></td>
+<td style="width: 146px">500000 ns</td>
+</tr>
+<tr>
+<td style="width: 585px"><span>Send packet CA | Netherlands | CA</span></td>
+<td style="width: 146px">150000000 ns</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>Here, we can see in specific numbers that if you want a donut and some coffee then you could eat 30<span>0,000,000 donuts from the fridge next to your computer before taking your first bite from a Danish.</span></p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

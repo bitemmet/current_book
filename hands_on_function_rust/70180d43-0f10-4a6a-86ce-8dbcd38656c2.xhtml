@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Privileged commands</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Privileged commands</h1>
+                </header>
+            
+            <article>
+                
+<p>Privileged commands must be authorized before being called, otherwise the command will be denied. Errors are checked after each operation and a <kbd>Result</kbd> value is returned:</p>
+<pre>pub fn input_floor(floor: i32) -&gt; Result&lt;(),ErrorCode&gt;<br/>{<br/>   unsafe {<br/>      magic::override_input_floor(floor);<br/>   }<br/>   check_error(())<br/>}<br/><br/>pub fn manual_mode() -&gt; Result&lt;(),ErrorCode&gt;<br/>{<br/>   unsafe {<br/>      magic::override_manual_mode();<br/>   }<br/>   check_error(())<br/>}<br/><br/>pub fn normal_mode() -&gt; Result&lt;(),ErrorCode&gt;<br/>{<br/>   unsafe {<br/>      magic::override_normal_mode();<br/>   }<br/>   check_error(())<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

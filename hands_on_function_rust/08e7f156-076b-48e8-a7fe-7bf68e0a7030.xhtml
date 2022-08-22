@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Defining lifetimes on ground types</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Defining lifetimes on ground types</h1>
+                </header>
+            
+            <article>
+                
+<p>A ground type is a type with no parameters. Defining lifetimes on ground types is the simplest possible case. All traits, fields, size, and any other information is directly available for group types.</p>
+<p>Here is a function declaring a lifetime on a ground type:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">fn ground_lifetime&lt;'a&gt;(x: &amp;'a u64) -&gt; &amp;'a u64<br/></span><span class="s1">{<br/></span><span class="s1">   x<br/></span><span class="s1">}<br/><br/></span><span class="s1">let x = 3;<br/></span><span class="s1">ground_lifetime(&amp;x);</span></pre>
+<p>Declaring lifetimes is often unnecessary. Other times, declaring lifetimes is necessary. The inference rules are complicated and are sometimes extended, so we will ignore that part for now.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

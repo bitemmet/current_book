@@ -1,0 +1,60 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Implementing Concurrency</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Implementing Concurrency</h1>
+                </header>
+            
+            <article>
+                
+<ol>
+<li>What is a subprocess?</li>
+</ol>
+<p style="padding-left: 60px">A subprocess is a child process started by a parent process. The child process must remain under the parent process to continue to be called a <strong>subprocess</strong>.</p>
+<ol start="2">
+<li>Why is fork called fork?</li>
+</ol>
+<p style="padding-left: 60px">fork means a split (process), like a fork in the road, or a forked tongue.</p>
+<ol start="3">
+<li>Is fork still useful?</li>
+</ol>
+<p style="padding-left: 60px">Yes! If you have access to it on your system. For example, the heartbeat pattern is much more elegant with fork.</p>
+<ol start="4">
+<li>When were threads standardized?</li>
+</ol>
+<p style="padding-left: 60px">Threads have never been universally standardized. The Posix standard introduced threads in 1995. Notably, Windows provides no standard or guarantees regarding thread behavior. There are similarities, but no standard.</p>
+<div>
+<div>
+<div>
+<ol start="5">
+<li>Why is move sometimes needed for thread closures?</li>
+</ol>
+<p style="padding-left: 60px">Move tells the compiler that it is OK to transfer ownership of captured variables to the closure.</p>
+<ol start="6">
+<li>What is the difference between <kbd>Send</kbd> and <kbd>Sync</kbd> traits?</li>
+</ol>
+<p style="padding-left: 60px"><kbd>Sync</kbd> is a stronger assertion of thread-safety—a type is <kbd>Send</kbd> if it is safe to send it to another thread. A type is <kbd>Sync</kbd> if it is safe to share between threads.</p>
+<ol start="7">
+<li>What are we allowed to lock, then mutate Mutex without an unsafe block?</li>
+</ol>
+<p style="padding-left: 60px">The compiler has determined that Mutex is already safe to use and meets certain requirements for safety. That is not to say that bad things can't happen—a Mutex will poison itself if one of its <kbd>MutexGuards</kbd> (the thing it returns when a lock is obtained) is dropped during a panic. Any future attempts to lock the Mutex will return an <kbd>Err</kbd> or <kbd>panic!</kbd>.</p>
+</div>
+</div>
+</div>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

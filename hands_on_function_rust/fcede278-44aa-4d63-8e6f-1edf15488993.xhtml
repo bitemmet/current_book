@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Using subprocess concurrency</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Using subprocess concurrency</h1>
+                </header>
+            
+            <article>
+                
+<p>A subprocess is a command that is started from within another process. As a simple example of this, let's create a parent process with three children. <kbd>process_a</kbd> will be the parent. Consider the following code snippet:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::process::Command;<br/></span><span class="s1">use std::env::current_exe;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let path = current_exe()<br/></span><span class="s1">             .expect("could not find current executable");</span><span class="s1"><br/></span><span class="s1">   let path = path.with_file_name("process_b");<br/></span><span class="s1"><br/></span><span class="s1">   let mut children = Vec::new();<br/></span><span class="s1">   for _ in 0..3 {<br/></span><span class="s1">      children.push(<br/></span><span class="s1">         Command::new(path.as_os_str())<br/></span><span class="s1">                 .spawn()<br/></span><span class="s1">                 .expect("failed to execute process")<br/></span><span class="s1">      );<br/></span><span class="s1">   }<br/></span><span class="s1">   for mut c in children {<br/></span><span class="s1">      c.wait()<br/></span><span class="s1">       .expect("failed to wait on child");<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>The child process, <kbd>process_b</kbd>, runs a loop and prints its own process ID. This is shown as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::{thread,time};<br/></span><span class="s1">use std::process;<br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let t = time::Duration::from_millis(1000);<br/></span><span class="s1">   loop {<br/></span><span class="s1">      println!("process b #{}", process::id());<br/></span><span class="s1">      thread::sleep(t);<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>If you run <kbd>process_a</kbd>, then you will see output from the three <kbd>process_b</kbd> processes:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">process b #54061<br/></span><span class="s1">process b #54060<br/></span><span class="s1">process b #54059<br/></span><span class="s1">process b #54061<br/></span><span class="s1">process b #54059<br/></span><span class="s1">process b #54060</span></pre>
+<p>If you inspect the process tree starting at <kbd>process_a</kbd>, then you will find that three <kbd>process_b</kbd> processes are attached as children, as shown in the following code:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">$ ps -a | grep process_a<br/></span><span class="s1">54058 ttys001<span class="Apple-converted-space">    </span>0:00.00 process_a<br/></span><span class="s1">55093 ttys004<span class="Apple-converted-space">    </span>0:00.00 grep process_a<br/></span><span class="s1">$ pstree 54058<br/></span><span class="s1">54058 process_a<br/></span>&gt;   54059 process_b<br/>&gt;   54060 process_b<br/>&gt;   54061 process_b</pre>
+<p>The preceding commands to inspect the process tree require a Unix-like Command Prompt. The subprocess module itself, though, is more or less platform-independent.</p>
+<p>Subprocess concurrency is useful if you want to run and manage other projects or utilities. A good example of subprocess concurrency done right is the <kbd>cron</kbd> utility. <kbd>cron</kbd> accepts a configuration file that specifies different commands to be run, and a schedule of when to run them. <kbd>cron</kbd> continues to run in the background and at the appropriate time starts each configured process according to schedule.</p>
+<p>Subprocess concurrency is not well suited for parallel computation in general. No resources will be shared between parent and child processes when using the <kbd>subprocess::Command</kbd> interface. Also, information cannot be shared easily between these processes.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

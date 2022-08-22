@@ -1,0 +1,54 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the operate_elevator.rs executable</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the operate_elevator.rs executable</h1>
+                </header>
+            
+            <article>
+                
+<p>The operate elevator is very similar to the <kbd>simulate_trip.rs</kbd> and physics <kbd>run_simulation</kbd> code. The most significant difference is the ability to continue running while dynamically accepting new requests and adjusting motor control using the linked libraries. In the main executable, we follow the same logical process as before, adjusted for new names and type signatures:</p>
+<ol>
+<li>Initialize <kbd>ElevatorState</kbd>:</li>
+</ol>
+<pre style="padding-left: 30px">//1. Store location, velocity, and acceleration state<br/>//2. Store motor input target force<br/>let mut est = ElevatorState {<br/>   timestamp: 0.0,<br/>   location: 0.0,<br/>   velocity: 0.0,<br/>   acceleration: 0.0,<br/>   motor_input: 0.0<br/>};</pre>
+<ol start="2">
+<li>Initialize <kbd>MotionController</kbd>:</li>
+</ol>
+<pre style="padding-left: 30px">let mut mc: Box&lt;MotionController&gt; = Box::new(SmoothMotionController {<br/>   timestamp: 0.0,<br/>   esp: esp.clone()<br/>});<br/>mc.init(esp.clone(), est.clone());</pre>
+<ol start="3">
+<li>Start the operating loop to process incoming floor requests:</li>
+</ol>
+<pre style="padding-left: 30px">//5. Loop continuously checking for new floor requests<br/>let original_ts = Instant::now();<br/>thread::sleep(time::Duration::from_millis(1));<br/>let mut next_floor = floor_requests.pop_request();<br/>while true<br/>{<br/>   if let Some(dst) = next_floor {<br/>      //process floor request<br/>   }</pre>
+<pre style="padding-left: 30px"><br/>   //check for dynamic floor requests<br/>   if let Some(dst) = esp.get_elevator_driver().poll_floor_request()<br/>   {<br/>      floor_requests.add_request(dst);<br/>   }<br/>}</pre>
+<ol start="4">
+<li>In the processing loop, update the physics approximations:</li>
+</ol>
+<pre style="padding-left: 30px">//5.1. Update location, velocity, and acceleration<br/>let now = Instant::now();<br/>let ts = now.duration_since(original_ts)<br/>            .as_fractional_secs();<br/>let dt = ts - est.timestamp;<br/>est.timestamp = ts;<br/><br/>est.location = est.location + est.velocity * dt;<br/>est.velocity = est.velocity + est.acceleration * dt;<br/>est.acceleration = {<br/>   let F = est.motor_input;<br/>   let m = esp.get_carriage_weight();<br/>   -9.8 + F/m<br/>};</pre>
+<ol start="5">
+<li>If the current floor request is satisfied, remove it from the queue:</li>
+</ol>
+<pre style="padding-left: 30px">//5.2. If next floor request in queue is satisfied, then remove from queue<br/>if (est.location - getCumulativeFloorHeight(esp.get_floor_heights(), dst)).abs() &lt; 0.01 &amp;&amp; est.velocity.abs() &lt; 0.01<br/>{<br/>   est.velocity = 0.0;<br/>   next_floor = floor_requests.pop_request();<br/>}</pre>
+<ol start="6">
+<li>Adjust the motor control:</li>
+</ol>
+<pre style="padding-left: 30px">//5.3. Adjust motor control to process next floor request<br/>est.motor_input = mc.poll(est.clone(), dst);<br/><br/>//Adjust motor<br/>esp.get_motor_controller().adjust_motor(est.motor_input);</pre>
+<ol start="2"/>
+<ol start="3"/>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,89 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Running simulations and analyzing data</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Running simulations and analyzing data</h1>
+                </header>
+            
+            <article>
+                
+<p>After running a simulation with <kbd>SimpleMotorController</kbd>, we gather an initial simulation log. A simulation log will be saved in JSON form thanks to the handy SerDe library. There should be an initial elevator specification, followed by an elevator state, for each iteration of the simulator. The <kbd>simulation.log</kbd> will end up looking something like the following:</p>
+<pre class="p2" style="padding-left: 30px"><span class="s1">{"floor_count":5,"floor_height":5.67,"carriage_weight":120000.0}</span><span class="s1">[{"timestamp":0.001288587,"location":0.0,"velocity":0.0,"acceleration":0.0,"motor_input":{"Up":{"voltage":147000.0}}},2]</span><span class="s1">[{"timestamp":0.002877568,"location":0.0,"velocity":0.0,"acceleration":0.0002577174000002458,"motor_input":{"Up":{"voltage":147003.86576100003}}},2]</span><span class="s1">[{"timestamp":0.004389254,"location":0.0,"velocity":3.8958778553677168e-7,"acceleration":0.000575513599999411,"motor_input":{"Up":{"voltage":147008.632704}}},2]</span><span class="s1">[{"timestamp":0.005886777,"location":5.834166693603828e-10,"velocity":0.0000012514326383486894,"acceleration":0.0008778508000002461,"motor_input":{"Up":{"voltage":147013.16776200004}}},2]</span><span class="s1">[{"timestamp":0.007377939,"location":2.449505465225691e-9,"velocity":0.0000025604503929786564,"acceleration":0.0011773553999994136,"motor_input":{"Up":{"voltage":147017.660331}}},2]</span><span class="s1">[{"timestamp":0.008929299,"location":6.421685786877059e-9,"velocity":0.000004386952466321746,"acceleration":0.0014755878000016765,"motor_input":{"Up":{"voltage":147022.13381700003}}},2]</span></pre>
+<p>This serialized output was created by our <span>SerDe </span>serialization library. There are several steps for implementing serialization using SerDe and it is very informative of how complex libraries work. To use SerDe for JSON serialization and deserialization, we must do the following:</p>
+<ol>
+<li>Add SerDe to dependencies in <kbd>Cargo.toml</kbd> as follows:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">[dependencies]<br/></span><span class="s1">serde = "1.0"<br/></span><span class="s1">serde_json = "1.0"<br/></span><span class="s1">serde_derive = "1.0"</span></pre>
+<ol start="2">
+<li>Add <kbd>macro_use</kbd> directives and <kbd>extern crate</kbd> imports to the project root:</li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">#[macro_use] extern crate serde_derive;<br/></span><span class="s1">extern crate serde;<br/></span><span class="s1">extern crate serde_json;</span></pre>
+<ol start="3">
+<li>Derive <kbd>Serialize</kbd> and <kbd>Deserialize</kbd> traits for data that will be serialized. To derive traits with macro manipulations on declarations, the <kbd>derive</kbd> <span>directive is used. For each macro in the directive, a corresponding procedural macro is expected. Consider the following code:</span></li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub enum MotorInput<br/></span><span class="s1">{<br/></span><span class="s1">   Up { voltage: f64 },<br/></span><span class="s1">   Down { voltage: f64 }<br/></span><span class="s1">}<br/></span><span class="s1"><br/>#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub struct ElevatorSpecification<br/></span><span class="s1">{<br/></span><span class="s1">   pub floor_count: u64,<br/></span><span class="s1">   pub floor_height: f64,<br/></span><span class="s1">   pub carriage_weight: f64<br/></span><span class="s1">}<br/><br/></span><span class="s1">#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub struct ElevatorState<br/></span><span class="s1">{<br/></span><span class="s1">   pub timestamp: f64,<br/></span><span class="s1">   pub location: f64,<br/></span><span class="s1">   pub velocity: f64,<br/></span></pre>
+<pre class="p1" style="padding-left: 60px"><span class="s1">   pub acceleration: f64,<br/></span><span class="s1">   pub motor_input: MotorInput<br/></span><span class="s1">}</span></pre>
+<ol start="4">
+<li>Serialize data as needed. In <kbd>lib.rs</kbd>, we serialize <kbd>ElevatorSpecification</kbd> <span>and</span> <kbd>ElevatorState structs</kbd><span>. Type hints are often necessary, as the type system doesn't like guessing:</span></li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">serde_json::to_string(&amp;datum).unwrap().as_bytes()</span></pre>
+<ol start="5">
+<li>Deserialize data as needed. In <kbd>analyze.rs</kbd>, we deserialize lines into <kbd>ElevatorSpecification</kbd> <span>and</span> <kbd>ElevatorState</kbd> <span>structs. Type hints are often necessary, as the type system doesn't like guessing:</span></li>
+</ol>
+<pre class="p1" style="padding-left: 60px"><span class="s1">serde_json::from_str(&amp;l).unwrap()</span></pre>
+<p>SerDe supports many built-in types to serialize and deserialize. These roughly correspond to all types that JSON permits, with additional structs permitted through type hints.</p>
+<p>Looking through <kbd>simulation.log</kbd>, we can find most of the built-in types:</p>
+<ul>
+<li><strong>Integer types</strong>: Integer types become direct JSON integers: </li>
+</ul>
+<pre style="padding-left: 60px">5</pre>
+<ul>
+<li><strong>Floating point types</strong>: Floating point integers become direct JSON floats:</li>
+</ul>
+<pre style="padding-left: 60px">6.54321</pre>
+<ul>
+<li><strong>Strings</strong>: Rust strings are also translated directly into JSON equivalents:</li>
+</ul>
+<pre style="padding-left: 60px">"<span class="s1">timestamp</span>"</pre>
+<ul>
+<li><strong>Vectors and arrays</strong>: Rust collections are sometimes serialized in unexpected ways. For the most part, vector types are translated directly into JSON arrays; containing the serialized version of whatever the vector contains:</li>
+</ul>
+<pre style="padding-left: 60px">[1,2,3,4,5,6,0]</pre>
+<ul>
+<li><strong>Tuples</strong>: Tuples are serialized into JSON arrays, however, the compiler typically requires a type hint to understand how to serialize/deserialize these types:</li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><span class="s1">[{"timestamp":0.007377939,"location":2.449505465225691e-9,"velocity":0.0000025604503929786564,"acceleration":0.0011773553999994136,"motor_input":{"Up":{"voltage":147017.660331}}},2]</span><span class="s1">[{"timestamp":0.008929299,"location":6.421685786877059e-9,"velocity":0.000004386952466321746,"acceleration":0.0014755878000016765,"motor_input":{"Up":{"voltage":147022.13381700003}}},2]</span></pre>
+<ul>
+<li><strong>Structs</strong>: Rust structs are translated directly into JSON objects. This always succeeds because Rust field names are valid object keys, as follows:</li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><span class="s1">{"floor_count":5,"floor_height":5.67,"carriage_weight":120000.0}</span></pre>
+<ul>
+<li><strong>Tagged unions</strong>: Tagged unions are a slightly strange case. The <kbd>union</kbd> constructor is converted into a JSON object like any other struct. The <kbd>union</kbd> tag, however, is also given its own struct, wrapping the <kbd>union</kbd> constructor in a separate object. Type hints are very much necessary for the compiler to serialize/deserialize correctly here: </li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><span class="s1">{"Up":{"voltage":147003.86576100003}}</span></pre>
+<ul>
+<li><strong>HashMap</strong>: Rust HashMaps are an odd case for serialization. The library attempts to convert them to JSON objects. However, not all HashMap keys can be serialized. Therefore, some serialization may fail and require custom serializers:</li>
+</ul>
+<pre style="padding-left: 60px">{"a":5,"b":6,"c":7}</pre>
+<p>Some types are difficult to serialize, including time structures such as <kbd>Instant</kbd>. Despite this difficulty in processing certain datatypes, the SerDe library is very stable, fast, and indispensable when storing and loading data.</p>
+<p>Running the analysis program, we can confirm that this motor controller is insufficient for meeting current project requirements:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">jerk is outside of acceptable limits: ElevatorState {<br/>   timestamp: 0.023739637,<br/>   location: 0,<br/>   velocity: 0,<br/>   acceleration: 1,<br/>   motor_input: Up { voltage: 162000 }<br/>}</span></pre>
+<p>Switching to <kbd>SmoothMotorController</kbd>, we can see that all specifications are met:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">All simulation checks passing.</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

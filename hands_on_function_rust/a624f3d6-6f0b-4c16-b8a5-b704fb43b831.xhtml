@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Multiples of small numbers are also small numbers</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Multiples of small numbers are also small numbers</h1>
+                </header>
+            
+            <article>
+                
+<p><span>The reverse may also be true. Sometimes the low frequency of </span><kbd>work</kbd><span> is overwhelmed by frequent and expensive </span><kbd>initialization</kbd><span>. Knowing which problem you have will let you know where to start looking to improve:</span></p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::{thread,time};<br/><br/></span><span class="s1">fn initialization() -&gt; Vec&lt;i32&gt; {<br/></span><span class="s1">   let t = time::Duration::from_millis(15000);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   println!("Initialize data.");<br/></span><span class="s1">   vec![1, 2, 3];<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn work(x: i32) -&gt; i32 {<br/></span><span class="s1">   let t = time::Duration::from_millis(150);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   println!("Work.");<br/></span><span class="s1">   x * x<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   for _ in 0..10 {<br/></span><span class="s1">      let data = initialization();<br/></span><span class="s1">      data.iter().map(|x| work(*x)).for_each(drop);<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

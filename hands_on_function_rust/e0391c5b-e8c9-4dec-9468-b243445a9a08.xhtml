@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Normal commands</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Normal commands</h1>
+                </header>
+            
+            <article>
+                
+<p>Normal commands do not require an authorized session to be called. Errors are checked after each call and a <kbd>Result</kbd> value is returned:</p>
+<pre>pub fn flash(pattern: i32) -&gt; Result&lt;(),ErrorCode&gt;<br/>{<br/>   unsafe {<br/>      magic::elevator_display_flash(pattern);<br/>   }<br/>   check_error(())<br/>}<br/><br/>pub fn toggle_light(light_id: i32) -&gt; Result&lt;(),ErrorCode&gt;<br/>{<br/>   unsafe {<br/>      magic::elevator_display_toggle_light(light_id);<br/>   }<br/>   check_error(())<br/>}<br/><br/>pub fn set_light_color(light_id: i32, color: i32) -&gt; Result&lt;(),ErrorCode&gt;<br/>{<br/>   unsafe {<br/>      magic::elevator_display_set_light_color(light_id, color);<br/>   }<br/>   check_error(())<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

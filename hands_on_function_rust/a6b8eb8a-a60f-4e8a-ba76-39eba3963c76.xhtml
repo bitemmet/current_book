@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Using the combinator pattern</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Using the combinator pattern</h1>
+                </header>
+            
+            <article>
+                
+<p><span>A combinator is a function that takes other functions as arguments and returns a new function.</span></p>
+<p>A simple example of a combinator would be the composition operator, which chains two functions together:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">fn compose&lt;A,B,C,F,G&gt;(f: F, g: G) -&gt; impl Fn(A) -&gt; C<br/></span><span class="s1">   where F: 'static + Fn(A) -&gt; B,<br/></span><span class="s1">         G: 'static + Fn(B) -&gt; C {<br/></span><span class="s1">   move |x| g(f(x))<br/></span><span class="s1">}<br/><br/></span>fn main() {<br/><span class="s1">   let fa = |x| x+1;<br/></span><span class="s1">   let fb = |y| y*2;<br/></span><span class="s1">   let fc = |z| z/3;<br/></span><span class="s1">   let g = compose(compose(fa,fb),fc);<br/></span><span class="s1">   println!("g(1) = {}", g(1));<br/></span><span class="s1">   println!("g(12) = {}", g(12));<br/></span><span class="s1">   println!("g(123) = {}", g(123));<br/></span>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

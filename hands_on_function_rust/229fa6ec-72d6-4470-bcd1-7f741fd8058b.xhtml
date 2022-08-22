@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Investigating parametric types</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Investigating parametric types</h1>
+                </header>
+            
+            <article>
+                
+<p>At this point, it shouldn't be surprising to learn that all datatype declarations can be parameterized. It should be noted that when declaring parameterized datatypes, the lifetime parameters must be located ahead of the generic parameters. Refer to the following code for this:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">type TFoo&lt;'a, A: 'a&gt; = (&amp;'a A, u64);<br/><br/></span><span class="s1">struct SFoo&lt;'a, A: 'a&gt;(&amp;'a A);<br/><br/></span><span class="s1">struct SBar&lt;'a, A: 'a&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   x: &amp;'a A<br/></span><span class="s1">}<br/><br/></span><span class="s1">enum EFoo&lt;'a, A: 'a&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   X { x: &amp;'a A },<br/></span><span class="s1">   Y { y: &amp;'a A },</span></pre>
+<pre class="p1" style="padding-left: 30px"><span class="s1"><br/></span><span class="s1">}</span></pre>
+<p>We have also seen how traits can be parameterized. However, what happens when a datatype and a trait both need parameters for implementation? There is a special syntax for that, involving three parameter lists, and it looks like the following:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">struct SBaz&lt;'a, 'b, A: 'a, B: 'b&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   a: &amp;'a A,<br/></span><span class="s1">   b: &amp;'b B,<br/></span><span class="s1">}<br/><br/></span><span class="s1">trait TBaz&lt;'a, 'b, A: 'a, B: 'b&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   fn baz(&amp;self);<br/></span><span class="s1">}<br/></span><span class="s1"><br/>impl&lt;'a, 'b, A: 'a, B: 'b&gt;<br/>TBaz&lt;'a, 'b, A, B&gt;<br/>for SBaz&lt;'a, 'b, A, B&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   fn baz(&amp;self){}<br/></span><span class="s1">}</span></pre>
+<p>There is one more special case that we should mention, and that is the case of method ambiguity. When multiple traits are implemented for a single type, it is possible for there to be multiple methods with the same name. To access the different methods, it becomes necessary to specify what <kbd>trait</kbd> is intended to be used when called. Here is an example:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">trait Foo {<br/></span><span class="s1">   fn f(&amp;self);<br/></span><span class="s1">}<br/><br/></span><span class="s1">trait Bar {<br/></span><span class="s1">   fn f(&amp;self);<br/></span><span class="s1">}<br/><br/></span><span class="s1">struct Baz;<br/><br/></span><span class="s1">impl Foo for Baz {<br/></span><span class="s1">   fn f(&amp;self) { println!("Baz’s impl of Foo"); }<br/></span><span class="s1">}<br/><br/></span><span class="s1">impl Bar for Baz {<br/></span><span class="s1">   fn f(&amp;self) { println!("Baz’s impl of Bar"); }<br/></span><span class="s1">}</span></pre>
+<pre class="p1" style="padding-left: 30px"><span class="s1"><br/></span><span class="s1">let b = Baz;</span></pre>
+<p>To call the method, we must use something called the <strong>universal function call syntax</strong>. There are two forms of the syntax, one short—the other longer. The short form is usually sufficient for resolving all but the most complicated of situations. Here is an example to match the preceding type definitions:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">Foo::f(&amp;b);<br/></span><span class="s1">Bar::f(&amp;b);<br/><br/></span><span class="s1">&lt;Baz as Foo&gt;::f(&amp;b);<br/></span><span class="s1">&lt;Baz as Bar&gt;::f(&amp;b);</span></pre>
+<p>There are also several less documented syntax forms (<a href="https://matematikaadit.github.io/posts/rust-turbofish.html">https://matematikaadit.github.io/posts/rust-turbofish.html</a>) syntax forms available for various scenarios where parameters need to be explicitly provided. Rust does not currently have direct type ascription currently, so hints for the compiler are provided as necessary.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

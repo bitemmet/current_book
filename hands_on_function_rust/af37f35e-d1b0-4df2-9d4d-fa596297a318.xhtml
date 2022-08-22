@@ -1,0 +1,42 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Adjusting motor control to process the next floor request</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Adjusting motor control to process the next floor request</h1>
+                </header>
+            
+            <article>
+                
+<p>To adjust motor control, we need to decide how much acceleration we want, and then calculate how much force is required to achieve the target acceleration. According to our objectives, we want shorter travel time, less motion sickness, and accurate stop locations.</p>
+<p>The metrics that we should optimize to achieve these objectives are to maximize average velocity, minimize acceleration, and minimize stop location error. All of these objectives compete with one another for precedence, so we will need to compromise between each to achieve good overall performance.</p>
+<p>With some research, you find that comfortable acceleration is limited to between 1 and 1.5 meters per second squared. You decide to aim for a maximum of  1 m/s<sup>2</sup>, with a slack of up to 1.5 m/s<sup>2</sup> in exceptional circumstances.</p>
+<p>For velocity, you decide that carriage speeds over 5 m/s are unsafe, so you will implement a maximum velocity, otherwise, the velocity should always be maximized to reach the next floor.</p>
+<p>For location precision, the calculation of target acceleration versus current velocity versus target destination is essential. Here, you will try to keep the acceleration near 1 <span>m/s</span><sup>2</sup>, with significant room for additional acceleration. When sufficiently close to the destination, it may be necessary to use a different acceleration target to make smaller motions and velocity adjustments.</p>
+<p>To implement this with code, we first calculate the deceleration range. This is defined as the distance from which, at the current velocity, we would need to decelerate at greater than 1 <span>m/s</span><sup>2</sup> to stop at the destination. Our acceleration buffer provides some room for correction, making this a safe target from which to start decelerating before reaching the next floor. This is shown in the following code:</p>
+<pre style="padding-left: 30px"><span class="s1">//it will take t seconds to decelerate from velocity v at -1 m/s^2<br/></span><span class="s1">let t = velocity.abs() / 1.0;<br/><br/></span><span class="s1">//during which time, the carriage will travel d=t * v/2 meters<br/></span><span class="s1">//at an average velocity of v/</span>2 before stopping<br/>let d = t * (velocity/2.0);<span class="s1"><br/><br/></span><span class="s1">//l = distance to next floor<br/></span><span class="s1">let l = (location - (next_floor as f64)*floor_height).abs();<br/></span></pre>
+<p>To calculate the target acceleration, we have three cases to consider:</p>
+<ul>
+<li><span>If we are in the deceleration range, then we should slow down</span></li>
+<li><span>If we are not in the deceleration range and not at maximum velocity, then we should accelerate</span></li>
+<li><span>If we are outside of the deceleration range but already at maximum velocity, then we should not change velocity:</span></li>
+</ul>
+<pre class="p1" style="padding-left: 60px"><span class="s1">let target_acceleration = {<br/></span><span class="s1">   //are we going up?<br/></span><span class="s1">   let going_up = location &lt; (next_floor as f64)*floor_height;<br/><br/></span><span class="s1">   //Do not exceed maximum velocity<br/></span><span class="s1">   if velocity.abs() &gt;= 5.0 {<br/>      //if we are going up and actually going up<br/>      //or we are going down and actually going down<br/></span><span class="s1">      if (going_up &amp;&amp; velocity&gt;0.0)<br/>      || (!going_up &amp;&amp; velocity&lt;0.0) {<br/></span><span class="s1">         0.0<br/></span><span class="s1">      //decelerate if going in wrong direction<br/></span><span class="s1">      } else if going_up {<br/></span><span class="s1">         1.0<br/></span><span class="s1">      } else {<br/></span><span class="s1">         -1.0<br/></span><span class="s1">      }<br/><br/></span><span class="s1">   //if within comfortable deceleration range and moving in right direction, decelerate<br/></span><span class="s1">   } else if l &lt; d &amp;&amp; going_up==(velocity&gt;0.0) {<br/></span><span class="s1">      if going_up {<br/></span><span class="s1">         -1.0<br/></span><span class="s1">      } else {<br/></span><span class="s1">         1.0<br/></span><span class="s1">      }<br/><br/></span><span class="s1">   //else if not at peak velocity, accelerate<br/></span><span class="s1">   } else {<br/></span><span class="s1">      if going_up {<br/></span><span class="s1">         1.0<br/></span><span class="s1">      } else {<br/></span><span class="s1">         -1.0<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">};</span></pre>
+<p>Finally, using the target acceleration, we can calculate how much voltage we should apply to each motor to achieve the desired acceleration. By inverting the formula previously used to calculate acceleration, we can now calculate our desired voltage from the target acceleration, as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">let gravity_adjusted_acceleration = target_acceleration + 9.8;<br/></span><span class="s1">let target_force = gravity_adjusted_acceleration * 1200000.0;<br/></span><span class="s1">let target_voltage = target_force / 8.0;<br/></span><span class="s1">if target_voltage &gt; 0.0 {<br/></span><span class="s1">   up_input_voltage = target_voltage;<br/></span><span class="s1">   down_input_voltage = 0.0;<br/></span><span class="s1">} else {<br/></span><span class="s1">   up_input_voltage = 0.0;<br/></span><span class="s1">   down_input_voltage = target_voltage.abs();<br/></span><span class="s1">};</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

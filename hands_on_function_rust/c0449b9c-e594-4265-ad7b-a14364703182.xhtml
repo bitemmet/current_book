@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Rust authorization with sessions</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Rust authorization with sessions</h1>
+                </header>
+            
+            <article>
+                
+<p>Here are high-level tests covering the authentication and deactivation of sessions:</p>
+<pre>#[test]<br/>fn authorize_override() {<br/>   admin::reset_state();<br/>   {<br/>      let session = admin::authorize_override().ok();<br/>      assert!(admin::is_override());<br/>   }<br/>   assert!(!admin::is_override());<br/>   assert!(admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn authorize_privileged() {<br/>   admin::reset_state();<br/>   {<br/>      let session = admin::authorize_privileged().ok();<br/>      assert(admin::is_privileged());<br/>   }<br/>   assert!(!admin::is_privileged());<br/>   assert!(admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn issue_admin_code() {<br/>   admin::reset_state();<br/>   {<br/>      let session = admin::authorize_admin().ok();<br/>      assert(admin::is_admin());<br/>   }<br/>   assert(!admin::is_admin());<br/>   assert!(admin::check_error(()).is_ok());<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

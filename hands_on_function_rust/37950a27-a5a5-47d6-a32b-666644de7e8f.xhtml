@@ -1,0 +1,53 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Writing the motor controller</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Writing the motor controller</h1>
+                </header>
+            
+            <article>
+                
+<p>The motor controllers in <kbd>src/motor.rs</kbd> will be responsible for making decisions regarding how much force to generate from the motor. The physics driver will supply current state information regarding all known measurements of location, velocity, and so on. Currently, the motor controller uses only the most current information to make control decisions. However, this may change in the future, in which case the controller may store past measurements.</p>
+<p>Extracting the same control algorithm from the previous chapter, the new <kbd>MotorController</kbd> definition becomes as follows:</p>
+<pre class="p1" style="padding-left: 30px">pub struct SimpleMotorController<br/>{<br/>   pub esp: ElevatorSpecification<br/>}<br/><br/>impl MotorController for SimpleMotorController<br/>{<br/>   fn init(&amp;mut self, esp: ElevatorSpecification, est: ElevatorState)<br/>   {<br/>      self.esp = esp;<br/>   }<br/><br/>   fn poll(&amp;mut self, est: ElevatorState, dst: u64) -&gt; MotorInput<br/>   {<br/>      //5.3. Adjust motor control to process next floor request<br/><br/>      //it will take t seconds to decelerate from velocity v <br/>        at -1 m/s^2<br/>      let t = est.velocity.abs() / 1.0;<br/><br/>      //during which time, the carriage will travel d=t * v/2 meters<br/>      //at an average velocity of v/2 before stopping<br/>      let d = t * (est.velocity/2.0);<br/><br/>      //l = distance to next floor<br/>      let l = (est.location - (dst as <br/>          f64)*self.esp.floor_height).abs();     </pre>
+<p>After establishing basic constants and values, we need to determine the target acceleration:</p>
+<pre class="p1" style="padding-left: 30px">      let target_acceleration = {<br/>         //are we going up?<br/>         let going_up = est.location &lt; (dst as <br/>            f64)*self.esp.floor_height;<br/><br/>         //Do not exceed maximum velocity<br/>         if est.velocity.abs() &gt;= 5.0 {<br/>            if going_up==(est.velocity&gt;0.0) {<br/>               0.0<br/>            //decelerate if going in wrong direction<br/>            } else if going_up {<br/>               1.0<br/>            } else {<br/>               -1.0<br/>            }<br/><br/>         //if within comfortable deceleration range and moving <br/>             in right direction, decelerate<br/>         } else if l &lt; d &amp;&amp; going_up==(est.velocity&gt;0.0) {<br/>            if going_up {<br/>               -1.0<br/>            } else {<br/>               1.0<br/>            }<br/><br/>         //else if not at peak velocity, accelerate<br/>         } else {<br/>            if going_up {<br/>               1.0<br/>            } else {<br/>               -1.0<br/>            }<br/>         }<br/>      };      </pre>
+<p>After determining the target acceleration, it should be converted into a <kbd>MotorInput</kbd> value:</p>
+<pre class="p1" style="padding-left: 30px">      let gravity_adjusted_acceleration = target_acceleration + 9.8;<br/>      let target_force = gravity_adjusted_acceleration * <br/>             self.esp.carriage_weight;<br/>      let target_voltage = target_force / 8.0;<br/>      if target_voltage &gt; 0.0 {<br/>         MotorInput::Up { voltage: target_voltage }<br/>      } else {<br/>         MotorInput::Down { voltage: target_voltage.abs() }<br/>      }<br/>   }<br/>}</pre>
+<p>Now, let's write a second controller, implementing the proposed improvements. We will compare the two controllers later in the simulation. The first suggestion was to reduce the polling interval. This change must be made in the physics simulator, so we will measure its effect, but we will not tie it to the motor controller. The second suggestion was to smooth the acceleration curve.</p>
+<p>After consideration, we realized that the change in acceleration (also called <strong>jerk</strong>) is what made people uncomfortable, more so than small acceleration forces. Understanding this, we will permit faster acceleration so long as the jerk remains small. We will replace the current target acceleration calculation with the following constraints and objectives:</p>
+<ul>
+<li>Maximum jerk = <kbd>0.2</kbd> m/s<sup>3</sup></li>
+<li>Maximum acceleration = <kbd>2.0</kbd> m/s<sup>2</sup></li>
+<li>Maximum velocity = <kbd>5.0</kbd> m/s</li>
+<li>Target change in acceleration:
+<ul>
+<li>0.2 if accelerating up</li>
+<li>-0.2 if accelerating down</li>
+<li>0.0 if at stable velocity</li>
+</ul>
+</li>
+</ul>
+<p>The resulting controller becomes as follows:</p>
+<pre style="padding-left: 30px">const MAX_JERK: f64 = 0.2;<br/>const MAX_ACCELERATION: f64 = 2.0;<br/>const MAX_VELOCITY: f64 = 5.0;<br/><br/>pub struct SmoothMotorController<br/>{<br/>   pub esp: ElevatorSpecification,<br/>   pub timestamp: f64<br/>}<br/><br/>impl MotorController for SmoothMotorController<br/>{<br/>   fn init(&amp;mut self, esp: ElevatorSpecification, est: ElevatorState)<br/>   {<br/>      self.esp = esp;<br/>      self.timestamp = est.timestamp;<br/>   }<br/><br/>   fn poll(&amp;mut self, est: ElevatorState, dst: u64) -&gt; MotorInput<br/>   {<br/>      //5.3. Adjust motor control to process next floor request<br/><br/>      //it will take t seconds to reach max from max<br/>      let t_accel = MAX_ACCELERATION / MAX_JERK;<br/>      let t_veloc = MAX_VELOCITY / MAX_ACCELERATION;<br/><br/>      //it may take up to d meters to decelerate from current<br/>      let decel_t = if (est.velocity&gt;0.0) == (est.acceleration&gt;0.0) {<br/>         //this case deliberately overestimates d to prevent "back up"<br/>         (est.acceleration.abs() / MAX_JERK) +<br/>         (est.velocity.abs() / (MAX_ACCELERATION / 2.0)) +<br/>         2.0 * (MAX_ACCELERATION / MAX_JERK)<br/>      } else {<br/>         //without the MAX_JERK, this approaches infinity and <br/>            decelerates way too soon<br/>         //MAX_JERK * 1s = acceleration in m/s^2<br/>         est.velocity.abs() / (MAX_JERK + est.acceleration.abs())<br/>      };<br/>      let d = est.velocity.abs() * decel_t;<br/><br/>      //l = distance to next floor<br/>      let l = (est.location - (dst as <br/>              f64)*self.esp.floor_height).abs();</pre>
+<p>After determining basic constants and values, we can calculate a target acceleration:</p>
+<pre style="padding-left: 30px">      let target_acceleration = {<br/>         //are we going up?<br/>         let going_up = est.location &lt; (dst as <br/>             f64)*self.esp.floor_height;<br/><br/>         //time elapsed since last poll<br/>         let dt = est.timestamp - self.timestamp;<br/>         self.timestamp = est.timestamp;<br/><br/>         //Do not exceed maximum acceleration<br/>         if est.acceleration.abs() &gt;= MAX_ACCELERATION {<br/>            if est.acceleration &gt; 0.0 {<br/>               est.acceleration - (dt * MAX_JERK)<br/>            } else {<br/>               est.acceleration + (dt * MAX_JERK)<br/>            }<br/><br/>         //Do not exceed maximum velocity<br/>         } else if est.velocity.abs() &gt;= MAX_VELOCITY<br/>            || (est.velocity + est.acceleration * <br/>               (est.acceleration.abs() / MAX_JERK)).abs() &gt;= <br/>                          MAX_VELOCITY {<br/>            if est.velocity &gt; 0.0 {<br/>               est.acceleration - (dt * MAX_JERK)<br/>            } else {<br/>               est.acceleration + (dt * MAX_JERK)<br/>            }<br/><br/>         //if within comfortable deceleration range and <br/>             moving in right direction, decelerate<br/>         } else if l &lt; d &amp;&amp; (est.velocity&gt;0.0) == going_up {<br/>            if going_up {<br/>               est.acceleration - (dt * MAX_JERK)<br/>            } else {<br/>               est.acceleration + (dt * MAX_JERK)<br/>            }<br/><br/>         //else if not at peak velocity, accelerate smoothly<br/>         } else {<br/>            if going_up {<br/>               est.acceleration + (dt * MAX_JERK)<br/>            } else {<br/>               est.acceleration - (dt * MAX_JERK)<br/>            }<br/>         }<br/>      };</pre>
+<p>After determining a target acceleration, we should calculate a target force:</p>
+<pre style="padding-left: 30px">      let gravity_adjusted_acceleration = target_acceleration + 9.8;<br/>      let target_force = gravity_adjusted_acceleration<br/>            * self.esp.carriage_weight;<br/>      let target_voltage = target_force / 8.0;<br/>      if !target_voltage.is_finite() {<br/>         //divide by zero etc.<br/>         //may happen if time delta underflows<br/>         MotorInput::Up { voltage: 0.0 }<br/>      } else if target_voltage &gt; 0.0 {<br/>         MotorInput::Up { voltage: target_voltage }<br/>      } else {<br/>         MotorInput::Down { voltage: target_voltage.abs() }<br/>      }<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

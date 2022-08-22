@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Preventing hard-to-reproduce bugs</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Preventing hard-to-reproduce bugs</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust was specifically designed to avoid hard-to-reproduce bugs like this. Raw pointer handling is prevented or strongly discouraged in Rust. A raw pointer is like a reference that Rust knows nothing about, and therefore can provide no safety guarantees regarding its use. Unfortunately, this bug is internal to a foreign library, so our Rust project doesn't have jurisdiction to complain about the root problem here. Despite this, there are still good practices that we can follow to prevent or limit the occurrence of bugs related to mutation and strange side-effects.</p>
+<p>The first technique we will recommend is immutability. By default, all variables are declared as immutable. This is Rust's way of not so subtly telling you to avoid mutating values if possible, as follows:</p>
+<pre>fn main() {<br/>   let a = 5;<br/>   let mut b = 5;<br/><br/>   //a = 4; not valid<br/>   b = 4;<br/><br/>   //*(&amp;mut a) = 3; not valid<br/>   *(&amp;mut b) = 3;<br/>}</pre>
+<p>Immutable values cannot be borrowed as mutable (by design), so requiring mutability for a function parameter will require mutability from each value sent to it:</p>
+<pre>fn f(x: &amp;mut i32) {<br/>   *x = 2;<br/>}<br/><br/>fn main() {<br/>   let a = 5;<br/>   let mut b = 5;<br/><br/>   //f(&amp;mut a); not valid<br/>   f(&amp;mut b);<br/>}</pre>
+<p>Turning an immutable value into a mutable one can be as simple as cloning it to create a new identical value; however, as we have seen throughout this chapter, the clone is not always a simple operation, an example is shown as follows:</p>
+<pre>use std::sync::{Mutex, Arc};<br/><br/>#[derive(Clone)]<br/>struct TimeBomb {<br/>   countdown: Arc&lt;Mutex&lt;i32&gt;&gt;<br/>}<br/>impl Drop for TimeBomb<br/>{<br/>   fn drop(&amp;mut self) {<br/>      let mut c = self.countdown.lock().unwrap();<br/>      *c -= 1;<br/>      if *c &lt;= 0 {<br/>         panic!("BOOM!!")<br/>      }<br/>   }<br/>}<br/><br/>fn main()<br/>{<br/>   let t3 = TimeBomb {<br/>      countdown: Arc::new(Mutex::new(3))<br/>   };<br/>   let t2 = t3.clone();<br/>   let t1 = t2.clone();<br/>   let t0 = t1.clone();<br/>}</pre>
+<p>Declaring a variable as immutable does not absolutely prevent all mutation, inside or out.  In Rust, immutable variables are permitted to hold interior fields with datatypes that are mutable. For example, <kbd>std::cell::RefCell</kbd> can be used to achieve interior mutability over whatever data it holds.</p>
+<p>Despite the exceptions, using immutable by default variables can help prevent simple bugs from becoming complex bugs. Don't let your programming style become a liability; practice defensive software development.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

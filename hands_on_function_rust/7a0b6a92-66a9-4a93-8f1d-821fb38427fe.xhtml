@@ -1,0 +1,51 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Metaprogramming</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Metaprogramming</h1>
+                </header>
+            
+            <article>
+                
+<p>The term metaprogramming in Rust often overlaps with the term macros. There are two primary types of macros available in Rust:</p>
+<ul>
+<li>Recursive</li>
+<li>Procedural</li>
+</ul>
+<p>Both types of macros take as input an <strong>abstract syntax tree</strong> (<strong>AST</strong>), and produce one or more AST.</p>
+<p>A commonly used macro is <kbd>println</kbd>. A variable number of arguments and types are joined with the format string through the use of a macro to produce formatted output. To invoke recursive macros like this, invoke the macro just like a function with the addition of a <kbd>!</kbd> before the arguments. Macro applications may alternatively be surrounded by <kbd>[]</kbd> or <kbd>{}</kbd>:</p>
+<pre style="padding-left: 30px">vec!["this is a macro", 1, 2];</pre>
+<p>Recursive macros are defined by <kbd>macro_rules!</kbd> statements. The inside of a <kbd>macro_rules</kbd> definition is very similar to that of a pattern-matching expression. The only difference is that <kbd>macro_rules!</kbd> matches syntax instead of data. We can use this format to define a reduced version of the <kbd>vec</kbd> macro. This is shown in the following code snippet, in <kbd>intro_metaprogramming.rs</kbd>:</p>
+<pre style="padding-left: 30px">macro_rules! my_vec_macro<br/>{<br/>    ( $( $x:expr ),* ) =&gt;<br/>    {<br/>        {<br/>            let mut temp_vec = Vec::new();<br/>            $(<br/>                temp_vec.push($x);<br/>            )*<br/>            temp_vec<br/>        }<br/>    }<br/>}</pre>
+<p>This definition accepts and matches only one pattern. It expects a comma-separated list of expressions. The syntax pattern <kbd>( $( $x: expr ),* )</kbd> matches against a comma-separated list of expressions and stores the result in the plural variable <kbd>$x</kbd>. In the body of the expression, there is a single block. The block defines a new <kbd>vec</kbd>, then iterates through <kbd>$x*</kbd> to push each <kbd>$x</kbd> into the <kbd>vec</kbd>, and, finally, the block returns the <kbd>vec</kbd> as its result. The macro and its expansion are as follows, in <kbd>intro_metaprogramming.rs</kbd>:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">//this<br/>my_vec_macro!(1, 2, 3);<br/><br/>//is the same as this<br/>{<br/>    let mut temp_vec = Vec::new();<br/>    temp_vec.push(1);<br/>    temp_vec.push(2);<br/>    temp_vec.push(3);<br/>    temp_vec<br/>}</span></pre>
+<p>It is important to note that expressions are moved as code, not as values, so side effects will be moved to the evaluating context, not the defining context.</p>
+<p>Recursive macro patterns match against token strings. It is possible to execute separate branches depending on which tokens are matched. A simple case match looks like the following, <span>in </span><kbd>intro_metaprogramming.rs</kbd>:</p>
+<pre style="padding-left: 30px"><span class="hljs-built_in">macro_rules!</span><span> my_macro_branch<br/>{</span><span><br/>    (1 $e:expr) =&gt; (</span><span class="hljs-built_in">println!</span><span>(</span><span class="hljs-string">"mode 1: {}"</span><span>, $e));<br/>    (2 $e:expr) =&gt; (</span><span class="hljs-built_in">println!</span><span>(</span><span class="hljs-string">"mode 2: {}"</span><span>, $e));<br/>}<br/><br/></span><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span><span>()<br/>{<br/>    my_macro_branch!(1 "abc"</span><span>);<br/>    my_macro_branch!(2 "def");<br/>}<br/></span></pre>
+<p>The name recursive macros comes from recursion in the macros, so of course we can call into the macro that we are defining. Recursive macros could be a quick way to define a domain-specific language. Consider the following code snippet, in <kbd>intro_metaprogramming.rs</kbd>:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">enum DSLTerm {<br/></span><span class="s1"><span class="Apple-converted-space">    </span>TVar { symbol: String },<br/></span><span class="s1"><span class="Apple-converted-space">    </span>TAbs { param: String, body: Box&lt;DSLTerm&gt; },<br/></span><span class="s1"><span class="Apple-converted-space">    </span>TApp { f: Box&lt;DSLTerm&gt;, x: Box&lt;DSLTerm&gt; }<br/></span><span class="s1">}<br/><br/></span><span class="s1">macro_rules! dsl<br/></span><span class="s1">{<br/></span><span class="s1">    ( ( $($e:tt)* ) ) =&gt; (dsl!( $($e)* ));</span><span class="s1"><br/></span><span class="s1">    ( $e:ident ) =&gt; (DSLTerm::TVar {<br/>        symbol: stringify!($e).to_string()<br/>    });<br/></span><span class="s1">    ( fn $p:ident . $b:tt ) =&gt; (DSLTerm::TAbs {<br/>        param: stringify!($p).to_string(),<br/>        body: Box::new(dsl!($b))<br/>    });<br/></span><span class="s1">    ( $f:tt $x:tt ) =&gt; (DSLTerm::TApp {<br/>        f: Box::new(dsl!($f)),<br/>        x: Box::new(dsl!($x))<br/>    });<br/></span>} </pre>
+<p>The second form of macro definitions is procedural macros. Recursive macros can be thought of as a nice syntax to help define procedural macros. Procedural macros, on the other hand, are the most general form. There are many things you can do with procedural macros that are simply impossible with the recursive form.</p>
+<p>Here, we can grab the <kbd>TypeName</kbd> of a <kbd>struct</kbd> and use that to automatically generate a trait implementation. Here is the macro definition, <span>in </span><kbd>intro_metaprogramming.rs</kbd>:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">#![crate_type = "proc-macro"]<br/></span><span class="s1">extern crate proc_macro;<br/></span><span class="s1">extern crate syn;<br/></span><span class="s1">#[macro_use]<br/>extern crate quote;<br/></span><span class="s1">use proc_macro::TokenStream;<br/></span><span class="s1">#[proc_macro_derive(TypeName)]<br/><br/></span><span class="s1">pub fn type_name(input: TokenStream) -&gt; TokenStream<br/>{<br/></span><span class="s1">    // Parse token stream into input AST<br/></span><span class="s1">    let ast = syn::parse(input).unwrap();<br/></span><span class="s1">    // Generate output AST<br/></span><span class="s1">    impl_typename(&amp;ast).into()<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn impl_typename(ast: &amp;syn::DeriveInput) -&gt; quote::Tokens<br/>{<br/></span><span class="s1">    let name = &amp;ast.ident;<br/></span><span class="s1">    quote!<br/>    {<br/></span><span class="s1">        impl TypeName for #name<br/>        {<br/></span><span class="s1">            fn typename() -&gt; String<br/>            {<br/></span><span class="s1">                stringify!(#name).to_string()<br/></span><span class="s1">            }<br/>        }<br/>    }<br/>}</span></pre>
+<p class="p1">The corresponding macro invocation looks like the following, in <kbd>intro_metaprogramming.rs</kbd>:</p>
+<pre style="padding-left: 30px">#[macro_use]<br/>extern crate metaderive;<br/><br/>pub trait TypeName<br/>{<br/>    fn typename() -&gt; String;<br/>}<br/><br/>#[derive(TypeName)]<br/>struct MyStructA<br/>{<br/>    a: u32,<br/>    b: f32<br/>}</pre>
+<p>As you can see, procedural macros are a bit more complicated to set up. However, the benefit is then that all processing is done directly with normal Rust code. These macros permit use of any syntactic information in unstructured format to <span>generate more code structures before compilation.</span></p>
+<p>Procedural macros are handled as separate modules to be precompiled and executed during normal compiler execution. The information provided to each macro is localized, so<br/>
+whole program consideration is not possible. However, the available local information is sufficient to achieve some fairly complicated effects.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

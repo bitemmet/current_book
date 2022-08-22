@@ -1,0 +1,55 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Inspecting the microcontroller drivers</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Inspecting the microcontroller drivers</h1>
+                </header>
+            
+            <article>
+                
+<p>The microcontroller drivers are written in other languages and exposed to Rust through the <strong>foreign function interface</strong> (<strong>FFI</strong>) feature. An FFI is a way of connecting Rust code to libraries written in other languages. The following are the symbols defined in the foreign library and bindings in <kbd>src/magic.rs</kbd>.</p>
+<p>This function issues an override code to the library and subsystem, as follows:</p>
+<pre>fn issue_override_code(code: c_int)</pre>
+<p>When an override code is entered, it will be exposed through this function. The higher layers should interpret what the override codes mean to potentially enter emergency operation modes or other maintenance functions, as follows:</p>
+<pre>fn poll_override_code() -&gt; c_int</pre>
+<p>When an override mode has been established and the emergency service worker enters a floor, this method will be called. Floor requests from emergency modes should take precedence over normal <kbd>elevator</kbd> operation:</p>
+<pre>fn poll_override_input_floor()</pre>
+<p>Error codes occurring from the <kbd>override</kbd> operation will be exposed through this function. Issues such as invalid override codes will be presented for higher layers to decide how to respond:</p>
+<pre>fn poll_override_error() -&gt; c_int</pre>
+<p>If an override code is entered, an authorized override session will be created:</p>
+<pre>fn poll_override_session() -&gt; *const c_void</pre>
+<p>After an override session is complete, it should be freed to release resources and reset state:</p>
+<pre>fn free_override_session(session: *const c_void)</pre>
+<p>If a physical key access is initiated to an elevator, then this method will expose the result:</p>
+<pre>fn poll_physical_override_privileged_session() -&gt; *const c_void</pre>
+<p>If a physical key access is initiated by an administrator, then this method will expose the result, as follows:</p>
+<pre>fn poll_physical_override_admin_session() -&gt; *const c_void</pre>
+<p>This function will force the elevator into manual operation mode:</p>
+<pre>fn override_manual_mode()</pre>
+<p>This function will force the elevator into normal operation mode:</p>
+<pre>fn override_normal_mode()</pre>
+<p>This function will reset the elevator state:</p>
+<pre>fn override_reset_state()</pre>
+<p>This function will perform a timed flashing pattern of lights on the elevator control panel:</p>
+<pre> fn elevator_display_flash(pattern: c_int)</pre>
+<p>This function will toggle the light for a button or other symbol on the elevator control panel:</p>
+<pre>fn elevator_display_toggle_light(light_id: c_int)</pre>
+<p>This function will alter the display color of a light on the elevator control panel:</p>
+<pre>fn elevator_display_set_light_color(light_id: c_int, color: int)</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

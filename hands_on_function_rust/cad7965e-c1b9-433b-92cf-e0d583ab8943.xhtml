@@ -1,0 +1,68 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Design Patterns</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Design Patterns</h1>
+                </header>
+            
+            <article>
+                
+<div>
+<div>
+<div>
+<ol>
+<li>What is a functor?</li>
+</ol>
+<p style="padding-left: 60px">A functor defines data, accepts a function, and returns a transformation of the data.</p>
+</div>
+</div>
+</div>
+<div>
+<div>
+<div>
+<ol start="2">
+<li>What is a contravariant functor?</li>
+</ol>
+<p style="padding-left: 60px">A contravariant functor is a functor where the accepted function may produce 0, 1, or many return values. By comparison, functor's accepted functions must return exactly 1 value.</p>
+<ol start="3">
+<li>What is a monad?</li>
+</ol>
+<p style="padding-left: 60px">A monad, parameterized by a single type <kbd>A</kbd>, is a value that has a trait exposing two operations, usually named <kbd>return</kbd> and <kbd>bind</kbd>. <kbd>return</kbd> is a function that constructs a new <kbd>monad&lt;A&gt;</kbd> from a provided <kbd>A</kbd> value. <kbd>bind</kbd> should incorporate new information to produce a related but separate <kbd>monad&lt;B&gt;</kbd>.</p>
+<ol start="4">
+<li>What are the monad laws?</li>
+</ol>
+<p style="padding-left: 60px">These equivalencies must hold for strict monads. The three horizontal bars means equivalence:</p>
+<pre style="padding-left: 60px">_return(v).bind(f) ≡ f(v)<br/><br/>m.bind(_return) ≡ m<br/><br/>m.bind(f).bind(g) ≡ (|x| f(x).bind(g))</pre></div>
+</div>
+<div>
+<ol start="5">
+<li>What is a combinator?</li>
+</ol>
+<p style="padding-left: 60px">A functional combinator combines functions. A combinator more generator combines things.</p>
+<ol start="6">
+<li>Why is the impl keyword necessary for closure return values?</li>
+</ol>
+<p style="padding-left: 60px">Closures are traits, not types. Therefore they do not have a size known at compile time. <kbd>impl</kbd> for a return type tells the compiler to parameterize the return type.</p>
+<ol start="7">
+<li>What is lazy evaluation?</li>
+</ol>
+<p style="padding-left: 60px">Lazy evaluation is when computation is delayed until some point in the future. This is compared to eager evaluation, where computation occurs immediately.</p>
+</div>
+</div>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

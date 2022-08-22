@@ -1,0 +1,52 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>When the owner goes out of scope, the value will be dropped</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">When the owner goes out of scope, the value will be dropped</h1>
+                </header>
+            
+            <article>
+                
+<p>In the preceding code, we can see the simple case where a function block is an owner. When the function block exits, the variables are dropped. Ownership can also be transferred, so when a value is sent or returned to another block, that block will become the new owner. The remaining case is that ownership is transferred to an object. When a value is dropped, all children objects are automatically dropped as well.</p>
+<p>In the current project, there are three tests failing, all related to the <kbd>.clone</kbd> method on sessions. The failing sessions look like the following:</p>
+<pre>#[test]<br/>fn clone_override() {<br/>   admin::reset_state();<br/>   {<br/>      let session = admin::authorize_override().ok().unwrap();<br/>      let session2 = session.clone();<br/>      assert!(admin::is_override());<br/>   }<br/>   assert!(!admin::is_override());<br/>   assert!(admin::check_error(()).is_ok());<br/>}</pre>
+<p>Removing the boilerplate, we can see that each of the three tests follows the same pattern:</p>
+<ol>
+<li>Open a new block
+<ol>
+<li>Authorize a new session</li>
+<li>Clone the new session</li>
+<li>Confirm that session is authorized</li>
+</ol>
+</li>
+<li>Close the block</li>
+<li>Confirm that session is not authorized</li>
+<li>Confirm that no errors occurred</li>
+</ol>
+<p>All tests work correctly, other than generating errors that are checked at the end of the test. The error code indicates a double free of the session. By normal Rust ownership rules, we know that cloned sessions will each be dropped individually. This makes sense because <kbd>Drop</kbd> is implemented for each of the two <kbd>AuthorizedSession</kbd> structs in scope. If we look at the implementation of <kbd>Drop</kbd> then we can see that it naively just calls the foreign library, which will cause the double free error:</p>
+<pre>#[derive(Clone)]<br/>pub struct AuthorizedSession<br/>{<br/>   session: *const c_void<br/>}<br/>impl Drop for AuthorizedSession {<br/>   fn drop(&amp;mut self) {<br/>      unsafe {<br/>         magic::free_override_session(self.session);<br/>      }<br/>   }<br/>}</pre>
+<p>Normally, Rust might complain about this careless resource management. However, the library uses an unsafe block to wrap the calls to the foreign function. Marking code as unsafe turns off many safety checks and encourages the compiler to trust the programmer. Calling foreign libraries is inherently unsafe, so this unsafe block is still necessary.</p>
+<p>The correct behavior here seems to be to free the session only once after all cloned sessions have been dropped. This is a good case for <kbd>std::rc::Rc</kbd>, which stands for reference counted.</p>
+<p><kbd>Rc</kbd> works by storing one owned value internal to itself. All owners of an <kbd>Rc</kbd> no longer hold direct ownership over the inner object of the reference counted container. To use the inner object, the borrower must ask to borrow a pointer to the inner object. Ownership of <kbd>Rc</kbd> objects will be counted, and when all references containing a given value are gone, the value will be dropped.</p>
+<p>This built-in functionality provides exactly what we want. Clone multiple times, drop once, as follows:</p>
+<pre>struct AuthorizedSessionInner(*const c_void);<br/><br/>#[derive(Clone)]<br/>pub struct AuthorizedSession<br/>{<br/>   session: Rc&lt;AuthorizedSessionInner&gt;<br/>}<br/><br/>impl Drop for AuthorizedSessionInner {<br/>   fn drop(&amp;mut self) {<br/>      unsafe {<br/>         magic::free_override_session(self.0);<br/>      }<br/>   }<br/>}</pre>
+<p>To initialize sessions from raw pointers, we need to wrap them. Otherwise, no code needs to change:</p>
+<pre>let session = AuthorizedSession {<br/>   session: Rc::new(AuthorizedSessionInner(session))<br/>};</pre>
+<p>After these small changes, the three remaining tests pass. The library seems to be working. The big lesson to learn here is that <kbd>Drop</kbd> implementations can be very sensitive sometimes. Don't assume that multiple drops will be safe. To deal with complex situations, we have in the standard library the types <kbd>std::rc::Rc</kbd> and <kbd>std::sync::Arc</kbd>. <kbd>Arc</kbd> is a threadsafe version of <kbd>Rc</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

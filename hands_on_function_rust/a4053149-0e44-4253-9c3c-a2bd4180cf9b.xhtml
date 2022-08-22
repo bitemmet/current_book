@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>File hierarchy, modules, and namespace design</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">File hierarchy, modules, and namespace design</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust programs are compiled primarily in one of two ways. The first is to use <kbd>rustc</kbd> to compile individual files. The second is to describe an entire package for compilation using <kbd>cargo</kbd>. We will assume here that projects are built using <kbd>cargo</kbd>, as follows:</p>
+<ol>
+<li>To start a package, you first create a <kbd>Cargo.toml</kbd> file in a directory. That directory will be your package directory from now on. This is a configuration file that will tell the compiler what code, assets, and extra information should be included into the package:</li>
+</ol>
+<pre style="padding-left: 60px"><span class="hljs-section">[package]<br/></span><span class="hljs-attr">name</span><span> = </span><span class="hljs-string">"fp_rust"<br/></span><span class="hljs-attr">version</span><span> = </span><span class="hljs-string">"0.0.1"<br/></span></pre>
+<ol start="2">
+<li>After this basic configuration, you can now use <kbd>cargo build</kbd> to compile the entire project. Where you decide to place your code files, and what to name them, is determined by how you want to refer to them in the module namespace. Each file will be given its own module <kbd>mod</kbd>. You can also nest modules inside files:</li>
+</ol>
+<pre style="padding-left: 60px"><span class="hljs-keyword">mod</span><span> inner_module<br/>{<br/></span><span class="hljs-function"><span class="hljs-keyword">    fn</span> f1</span><span>()<br/>    {<br/></span><span class="hljs-built_in">        println!</span><span>("inner module function"</span><span>);<br/>    }<br/>}<br/></span></pre>
+<ol start="3">
+<li>After these steps, projects can then be added as cargo dependencies, and namespaces can be used inside of modules to expose public symbols. Consider the following code snippet:</li>
+</ol>
+<pre style="padding-left: 60px">extern crate package;<br/>use package::inner_module::f1;</pre>
+<p>These are the basic building blocks of Rust modules, but what does this have to do with functional programming?</p>
+<p>Architecting a project in functional style is a process, and lends itself to certain routines. Typically, the project architect will start by designing the core data structures and in complex cases also the physical structure (where code/services will operationally be run). Once the data layout has been outlined in sufficient detail, then core functions/routines can be planned (such as how the program behaves). Up to this point, there may be code left unimplemented if coding is happening during the architecting stage. The final stage involves replacing this mock code with correct behaviors.</p>
+<p>Following this stage-by-stage development process, we can also see an archetypical file layout forming. It is common to see these stages written top to bottom in actual programs. Though it is unlikely the authors went through planning in these explicit stages, it still is a common pattern due to simplicity's sake. Consider the following example:</p>
+<pre style="padding-left: 30px">//trait definitions<br/><br/>//data structure and trait implementations<br/><br/>//functions<br/><br/>//main</pre>
+<p>Grouping definitions like this may be helpful to standardize file layout and improve readability. Searching back and forth through a long file for symbol definitions is a common but unpleasant part of programming. It is also a preventable problem.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

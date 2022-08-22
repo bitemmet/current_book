@@ -1,0 +1,39 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Functions as values</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Functions as values</h1>
+                </header>
+            
+            <article>
+                
+<p class="p2"><span class="s1">Functions are nominally the big feature of functional programming. Specifically, functions as values are the keystone of the whole paradigm. Glossing over much detail, we will also introduce the term <strong>closure</strong> here for future reference. A closure is an object that acts as a function, implementing <kbd>fn</kbd>, <kbd>Fn</kbd>, <kbd>FnMut</kbd>, or <kbd>FnOnce</kbd>.</span></p>
+<p class="p2"><span class="s1">Simple closures can be defined with the built-in closure syntax. This syntax is also beneficial because the <kbd>fn</kbd>, <kbd>Fn</kbd>, <kbd>FnMut</kbd>, and <kbd>FnOnce</kbd> traits are automatically implemented if permitted. This syntax is great for shorthand manipulation of data.</span></p>
+<p>Here is an iterator over the range <kbd>0</kbd> to <kbd>10</kbd>, mapped to the squared value. The square operation is applied using an inline closure definition sent to the <kbd>map</kbd> function of the iterator. The result of this expression will be an iterator. Here is an expression in <kbd>intro_functions.rs</kbd>:</p>
+<pre class="p3" style="padding-left: 30px"><span class="s2">(0..10).map(|x| x*x);</span></pre>
+<p class="p2"><span class="s1">Closures can also have complex bodies with statements if the block syntax is used.</span></p>
+<p>Here is an iterator from <kbd>0</kbd> to <kbd>10</kbd>, mapped with a complex equation. The closure provided to map includes a function definition and a variable binding in <kbd>intro_functions.rs</kbd>:</p>
+<pre style="padding-left: 30px"><span>(0..10).map(|x| {<br/>    fn f(y: u32) -&gt; u32 {<br/>        y*y<br/>    }<br/>    let z = f(x+1) * f(x+2);<br/>    z*z<br/>}</span></pre>
+<p class="p2"><span class="s1">It is possible to define functions or methods that accept closures as arguments. To use the closure as a callable function, a bound of <kbd>Fn</kbd>, <kbd>FnMut</kbd>, or <kbd>FnOnce</kbd> must be specified.</span></p>
+<p>Here is a HoF definition accepting a function <kbd>g</kbd> and an argument <kbd>x</kbd>. The definition constrains <kbd>g</kbd> and <kbd>x</kbd> to process <kbd>u32</kbd> types, and defines some mathematical operations involving calls to <kbd>g</kbd>. An invocation of the <kbd>f</kbd> HoF is also provided, as follows, using a simple inline closure definition in <kbd>intro_functions.rs</kbd>:</p>
+<pre style="padding-left: 30px">fn f&lt;T&gt;(g: T, x: u32) -&gt; u32<br/>where T: Fn(u32) -&gt; u32<br/>{<br/>    g(x+1) * g(x+2)<br/>}<br/><br/>fn main()<br/>{<br/>   f(|x|{ x*x }, 2);<br/>}</pre>
+<p class="p2"><span class="s1">Many parts of the standard library, particularly iterators, encourage heavy use of functions as arguments.</span></p>
+<p>Here is an iterator from <kbd>0</kbd> to <kbd>10</kbd> followed by many chained iterator combinators. The <kbd>map</kbd> function returns a new value from an original. <kbd>inspect</kbd> looks at a value, does not change it, but permits side-effects. <kbd>filter</kbd> omits all values that do not satisfy a predicate. <kbd>filter_map</kbd> filters and maps with a single function. The <kbd>fold</kbd> reduces all results to a single value, starting from an initial value, working left to right. Here is the expression in <kbd>intro_functions.rs</kbd>:</p>
+<pre style="padding-left: 30px">(0..10<span>).map(|x| x*x)<br/></span><span>       .inspect(|x|{ println!("value {}", *x) })<br/>       .filter(|x| *x&lt;3)<br/>       .filter_map(|x| Some(x))<br/>       .fold(0, |x,y| x+y);<br/></span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

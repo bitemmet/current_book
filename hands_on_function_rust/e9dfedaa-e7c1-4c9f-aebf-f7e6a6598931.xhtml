@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Denying access to privileged commands</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Denying access to privileged commands</h1>
+                </header>
+            
+            <article>
+                
+<p>Privileged commands should be denied if there is no authorized active session:</p>
+<pre>#[test]<br/>fn deny_input_floor() {<br/>   admin::reset_state();<br/>   admin::input_floor(2).err();<br/>   assert!(!admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn deny_manual_mode() {<br/>   admin::reset_state();<br/>   admin::manual_mode().err();<br/>   assert!(!admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn deny_normal_mode() {<br/>   admin::reset_state();<br/>   admin::normal_mode().err();<br/>   assert!(!admin::check_error(()).is_ok());<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

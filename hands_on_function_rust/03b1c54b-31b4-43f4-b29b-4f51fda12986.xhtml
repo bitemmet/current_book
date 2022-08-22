@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Doing less work</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Doing less work</h1>
+                </header>
+            
+            <article>
+                
+<p>Faster programs do less. All optimization is a process of searching for work that doesn't need to be done, and then not doing it.</p>
+<p>Similarly, the smallest programs fewer resources less. All space optimization is a process of searching for resources that don't need to be used, and then not using them.</p>
+<p>For example, don't collect an iterator when you don't need the result, consider the following example:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">extern crate flame;<br/></span><span class="s1">use std::fs::File;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   let v: Vec&lt;u64&gt; = vec![2; 1000000];<br/><br/></span><span class="s1">   flame::start("Iterator .collect");<br/></span><span class="s1">   let mut _z = vec![];<br/></span><span class="s1">   for _ in 0..1000 {<br/></span><span class="s1">      _z = v.iter().map(|x| x*x).collect::&lt;Vec&lt;u64&gt;&gt;();<br/></span><span class="s1">   }<br/></span><span class="s1">   flame::end("Iterator .collect");<br/><br/></span><span class="s1">   flame::start("Iterator iterate");<br/></span><span class="s1">   for _ in 0..1000 {<br/></span><span class="s1">      v.iter().map(|x| x * x).for_each(drop);<br/></span><span class="s1">   }<br/></span><span class="s1">   flame::end("Iterator iterate");<br/><br/></span><span class="s1">   flame::dump_html(&amp;mut File::create("flame-graph.html").unwrap()).unwrap();<br/></span><span class="s1">}</span></pre>
+<p>Needlessly collecting the result of the iterator makes the code 27% slower compared to code that just drops the result.</p>
+<p>Memory allocation is similar. Well-designed code preferring pure functions and avoiding side-effects will tend to minimize memory usage. In contrast, messy code can lead to old data hanging around. Rust memory safety does not extend to preventing memory leaks. Leaks are considered safe code:</p>
+<pre class="p1"><span class="s1">use std::mem::forget;<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   for _ in 0..10000 {<br/></span><span class="s1">      let mut a = vec![2; 10000000];<br/></span><span class="s1">      a[2] = 2;<br/></span><span class="s1">      forget(a);<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/></span></pre>
+<p><span>The <kbd>forget</kbd> function is seldom used. Similarly, memory leaks are permitted but sufficiently discouraged that they are somewhat uncommon. Rust memory management tends to be such that by the time you cause a memory leak you are probably waist-deep in other poor design decisions.</span></p>
+<p><span>However,</span> unsused <span>memory is not uncommon. If you don't keep track of what variables you are actively using, then old variables will likely remain in scope. This is not the typical definition of a memory leak; however, unused data is a similar waste of resources.</span></p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

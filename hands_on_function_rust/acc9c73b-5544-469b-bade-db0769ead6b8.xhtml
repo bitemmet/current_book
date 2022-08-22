@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Learning the rules of ownership</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Learning the rules of ownership</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust has three rules of ownership:</p>
+<ul>
+<li>Each value in Rust has a variable that's called its <strong>owner</strong></li>
+<li>There can only be one owner at a time</li>
+<li>When the owner goes out of scope, the value will be dropped</li>
+</ul>
+<p>In the simplest case, we can define a block with a variable that goes out of scope at the end of the block:</p>
+<pre>fn main()<br/>{<br/>   //variable x has not yet been defined<br/>   {<br/>      let x = 5;<br/>      //variable x is now defined and owned by this context<br/><br/>      //variable x is going out of scope and will be dropped here<br/>   }<br/>   //variable x has gone out of scope and is no longer defined<br/>}</pre>
+<p>We have brushed against the first two rules of ownership and lifetimes in previous chapters. However, this is the first chapter in which we have needed to work with the third rule—drop.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Organizing the motor_controllers.rs module</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Organizing the motor_controllers.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>All motors will be grouped by type in the <kbd>motor_controller.rs</kbd> module. There will be three motors with varying properties. This module should provide a trait interface to all motors as well as each implementation. The trait should define a method to generate a motor input from the desired force output and also a method to accept a motor input to generate a force. The module must also link in the binary drivers for each motor controller. The old motor controller logic to dynamically control the elevator motor will be moved into a new file called <kbd>motion_controllers.rs</kbd>. The following should be defined in this module:</p>
+<ul>
+<li>Motor input trait</li>
+<li><span>Motor </span>controller trait</li>
+<li><span>Motor</span> input 1 implementation</li>
+<li><span>Motor</span> controller 1 implementation</li>
+<li><span>Motor</span> input 2 implementation</li>
+<li><span>Motor</span> controller 2 implementation</li>
+<li><span>Motor</span> input 3 implementation</li>
+<li><span>Motor </span>controller 3 implementation</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

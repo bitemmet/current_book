@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Parameterizing functions and trait objects</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Parameterizing functions and trait objects</h1>
+                </header>
+            
+            <article>
+                
+<p>In our motor controllers, we make another baseless assumption about the motor. Namely, that a flat force will be generated per voltage input. The suspect code in the motor controllers looks like the following:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">let target_voltage = target_force / 8.0;</span></pre>
+<p>The assumption may be wrong with respect to the motor being more or less efficient than assumed. Also, the assumption that generated force will be linear with respect to voltage is unlikely. To satisfy the requirements of our motor controller and the physics simulation, we require one function that will consider the physical motor being used and convert the voltage to force. Similarly, we need the inverse function to convert the target force to target voltage. We can write these plainly as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub fn force_of_voltage(v: f64) -&gt; f64<br/></span><span class="s1">{<br/></span><span class="s1">   8.0 * v<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub fn voltage_of_force(v: f64) -&gt; f64<br/></span><span class="s1">{<br/></span><span class="s1">   v / 8.0<br/></span><span class="s1">}</span></pre>
+<p>This is nice to look at, but it doesn't fit into the goal of abstracting the concept of a physical motor. We should define these functions as methods on an interface. This way, we can use the trait object pattern again to abstract away the type of motor, as well as the type parameter for the motor. The code becomes as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub trait Motor<br/></span><span class="s1">{<br/></span><span class="s1">   fn force_of_voltage(&amp;self, v: f64) -&gt; f64;<br/></span><span class="s1">   fn voltage_of_force(&amp;self, v: f64) -&gt; f64;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub struct SimpleMotor;<br/></span><span class="s1">impl Motor for SimpleMotor<br/></span><span class="s1">{<br/></span><span class="s1">   fn force_of_voltage(&amp;self, v: f64) -&gt; f64<br/></span><span class="s1">   {<br/></span><span class="s1">      8.0 * v<br/></span><span class="s1">   }<br/></span><span class="s1">   fn voltage_of_force(&amp;self, v: f64) -&gt; f64<br/></span><span class="s1">   {<br/></span><span class="s1">      v / 8.0<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>After declaring the <kbd>Motor</kbd> trait and an implementation, we can integrate this definition with the <kbd>ElevatorSpecification</kbd> struct. The result is as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub struct ElevatorSpecification<br/></span><span class="s1">{<br/></span><span class="s1">   pub floor_count: u64,<br/></span><span class="s1">   pub floor_height: f64,<br/></span><span class="s1">   pub carriage_weight: f64,<br/></span><span class="s1">   pub motor: Box&lt;Motor&gt;<br/></span><span class="s1">}</span></pre>
+<p>Again, we lose the ability to use certain derive macros, but the type signature is much cleaner at least. The usage in the motor controllers now supports multiple motors:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">let target_voltage = self.esp.motor.voltage_of_force(target_force);</span></pre>
+<p>We can see that there are some potential tradeoffs between different types of parameterization or generic behavior. On one hand, parameters can quickly become overwhelming to keep track of. On the other, side trait objects break many languages with features such as derive macros, anything that is not object-safe, requiring a concrete type, and so on. Choosing the right tool is an important decision that requires weighing the merits of each option.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

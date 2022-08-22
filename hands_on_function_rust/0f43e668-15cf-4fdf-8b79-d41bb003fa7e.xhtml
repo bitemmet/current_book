@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Rust sharing session reference</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Rust sharing session reference</h1>
+                </header>
+            
+            <article>
+                
+<p>The high-level library supports cloning sessions. Yikes! This could get complicated, but the tests are clear as to how it should work:</p>
+<pre>#[test]<br/>fn clone_override() {<br/>   admin::reset_state();<br/>   {<br/>      let session = admin::authorize_override().ok().unwrap();<br/>      let session2 = session.clone();<br/>      assert!(admin::is_override());<br/>   }<br/>   assert!(!admin::is_override());<br/>   assert!(admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn clone_privileged() {<br/>   admin::reset_state();<br/>   {<br/>      let session = admin::authorize_privileged().ok().unwrap();<br/>      let session2 = session.clone();<br/>      assert!(admin::is_privileged());<br/>   }<br/>   assert!(!admin::is_privileged());<br/>   assert!(admin::check_error(()).is_ok());<br/>}<br/><br/>#[test]<br/>fn clone_admin() {<br/>   admin::reset_state();<br/>   {<br/>      let session = admin::authorize_admin().ok().unwrap();<br/>      let session2 = session.clone();<br/>      assert!(admin::is_admin());<br/>   }<br/>   assert!(!admin::is_admin());<br/>   assert!(admin::check_error(()).is_ok());<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

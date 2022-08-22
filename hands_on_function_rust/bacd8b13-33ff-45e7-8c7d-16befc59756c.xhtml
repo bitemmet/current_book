@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Exponential growth</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Exponential growth</h1>
+                </header>
+            
+            <article>
+                
+<p>Exponential performance in engineering is almost always a bug or a dead end. This is the wall that separates algorithms that we use from algorithms that we would like to use but can't due to performance reasons.</p>
+<p>Exponential growth in programs is often accompanied by the term <kbd>bomb</kbd>:</p>
+<pre class="p1"><span class="s1">fn bomb(n: u64) -&gt; u64 {<br/></span><span class="s1">   if n &gt; 0 {<br/></span><span class="s1">      bomb(n-1);<br/></span><span class="s1">      bomb(n-1);<br/></span><span class="s1">   }<br/></span><span class="s1">   n<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   bomb(1000);<br/></span><span class="s1">}</span></pre>
+<p>This program is only <em>O</em>(2<sup>n</sup>) and therefore barely even exponential!</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

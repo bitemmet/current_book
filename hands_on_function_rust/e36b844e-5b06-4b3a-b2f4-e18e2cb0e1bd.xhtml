@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Issuing normal commands</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Issuing normal commands</h1>
+                </header>
+            
+            <article>
+                
+<p>Normal commands do not require authorization, so these tests just check that the commands are issued and received:</p>
+<pre>#[test]<br/>fn flash() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::elevator_display_flash(222);<br/>      assert!(magic::poll_override_code() == 7);<br/>      assert!(magic::poll_override_code() == 222);<br/>   }<br/>}<br/><br/>#[test]<br/>fn toggle_light() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::elevator_display_toggle_light(33);<br/>      assert!(magic::poll_override_code() == 8);<br/>      assert!(magic::poll_override_code() == 33);<br/>      assert!(magic::poll_override_code() == 1);<br/>      magic::elevator_display_toggle_light(33);<br/>      assert!(magic::poll_override_code() == 8);<br/>      assert!(magic::poll_override_code() == 33);<br/>      assert!(magic::poll_override_code() == 0);<br/>   }<br/>}<br/><br/>#[test]<br/>fn set_light_color() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::elevator_display_set_light_color(33, 222);<br/>      assert!(magic::poll_override_code() == 9);<br/>      assert!(magic::poll_override_code() == 33);<br/>      assert!(magic::poll_override_code() == 222);<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

@@ -1,0 +1,55 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Functional Data Structures</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Functional Data Structures</h1>
+                </header>
+            
+            <article>
+                
+<ol>
+<li>What is a good library to serialize and deserialize data?</li>
+</ol>
+<p style="padding-left: 60px">We recommend <kbd>serde</kbd>.</p>
+<ol start="2">
+<li>What do the hashtag derive lines in front of the struct declarations in <kbd>physics.rs</kbd> do?</li>
+</ol>
+<p style="padding-left: 60px">These are macros that will automatically derive trait implementations for these data structures.</p>
+<ol start="3">
+<li>Which comes first in parameterized declarations—lifetimes or traits?</li>
+</ol>
+<p style="padding-left: 60px">Lifetime parameters must come before trait parameters in parameter declarations.</p>
+<ol start="4">
+<li>In a trait implementation, what is the difference between parameters on the impl, trait, or type?</li>
+</ol>
+<p style="padding-left: 60px">The <kbd>impl&lt;A,...&gt;</kbd> syntax defines what symbols will be parameterized. The <kbd>Trait&lt;A,...&gt;</kbd> syntax defines what trait is being implemented. The <kbd>Type&lt;A,...&gt;</kbd> syntax defines what type the trait is being implemented for.</p>
+<ol start="5">
+<li>What is the difference between a trait and a data class?</li>
+</ol>
+<p style="padding-left: 60px">The term <strong>data class</strong> is not a Rust term. Think of a data class as if it were a trait but without fewer limitations than what Rust might impose.</p>
+<ol start="6">
+<li>How should you declare that a package has multiple binaries?</li>
+</ol>
+<p style="padding-left: 60px">In <kbd>Cargo.toml</kbd>, list all of the binaries and their entry points:</p>
+<pre class="p1" style="padding-left: 60px"><span class="s1">[[bin]]<br/></span><span class="s1">name = "binary1"<br/></span><span class="s1">path = "binary1.rs"<br/><br/></span><span class="s1">[[bin]]<br/></span><span class="s1">name = "binary2"<br/></span><span class="s1">path = "binary2.rs"</span></pre>
+<ol start="7">
+<li>How do you declare a structure field as private?</li>
+</ol>
+<p style="padding-left: 60px">Do not declare it as <kbd>public</kbd>. Fields are <kbd>private</kbd> by default.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

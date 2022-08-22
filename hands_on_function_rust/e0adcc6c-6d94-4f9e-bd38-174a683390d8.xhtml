@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Parameterizing data</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Parameterizing data</h1>
+                </header>
+            
+            <article>
+                
+<p>Parametric data allows us to declare only the minimal amount of semantic information required. Instead of specifying a type, we can specify a generic parameter having a trait. Let's start by looking at <kbd>physics.rs</kbd> type declarations:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub enum MotorInput<br/></span><span class="s1">{<br/></span><span class="s1">   Up { voltage: f64 },<br/></span><span class="s1">   Down { voltage: f64 }<br/></span><span class="s1">}<br/><br/>#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub struct ElevatorSpecification<br/></span><span class="s1">{<br/></span><span class="s1">   pub floor_count: u64,<br/></span><span class="s1">   pub floor_height: f64,</span></pre>
+<pre class="p1" style="padding-left: 30px"><span class="s1"><br/></span><span class="s1">   pub carriage_weight: f64<br/></span><span class="s1">}</span><span class="s1"><br/></span><span class="s1">#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub struct ElevatorState</span><span class="s1"><br/></span><span class="s1">{<br/></span><span class="s1">   pub timestamp: f64,<br/></span><span class="s1">   pub location: f64,<br/></span><span class="s1">   pub velocity: f64,<br/></span><span class="s1">   pub acceleration: f64,<br/></span><span class="s1">   pub motor_input: MotorInput<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub type FloorRequests = Vec&lt;u64&gt;;</span></pre>
+<p>If we remember, where we used <kbd>physics.rs</kbd> when we designed the new <kbd>MotorInput</kbd> implementation, we should notice a problem. We wanted to abstract <kbd>MotorInput</kbd> behavior behind a trait; however, <kbd>ElevatorState</kbd> specifies a specific implementation. Let's redefine <kbd>ElevatorState</kbd> to use a generic type for <kbd>motor_input</kbd>. The parameter should implement all traits of <kbd>MotorInput</kbd>, and will, therefore, become as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub struct ElevatorState&lt;MI: MotorForce + MotorVoltage + Clone, 'a serde::Serialize, 'a serde::Deserialize + Debug&gt;</span><span class="s1"><br/></span><span class="s1">{<br/></span><span class="s1">   pub timestamp: f64,<br/></span><span class="s1">   pub location: f64,<br/></span><span class="s1">   pub velocity: f64,<br/></span><span class="s1">   pub acceleration: f64,<br/></span><span class="s1">   pub motor_input: MI<br/></span><span class="s1">}</span></pre>
+<p>This may look acceptable at first glance, but now the <kbd>MotorInput</kbd> parameter and all traits must be declared along with every mention of any type that wraps <kbd>MotorInput</kbd> or <kbd>ElevatorState</kbd>. We get an explosion of parameters. There must be a better way.</p>
+<p>Parameter explosion, in this case, would look like the following, at every type declaration, trait declaration, implementation, function, or expression:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">pub trait MotorController<br/></span><span class="s1">&lt;MI: MotorForce + MotorVoltage + Clone, 'a serde::Serialize, 'a serde::Deserialize + Debug&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   fn init(&amp;mut self, esp: ElevatorSpecification, est: ElevatorState&lt;MI&gt;);<br/></span><span class="s1">   fn poll(&amp;mut self, est: ElevatorState&lt;MI&gt;, dst: u64) -&gt; MI;</span></pre>
+<pre class="p1" style="padding-left: 30px"><span class="s1"><br/></span><span class="s1">}<br/><br/></span><span class="s1">pub trait DataRecorder</span><span class="s1"><br/></span><span class="s1">&lt;MI: MotorForce + MotorVoltage + Clone, 'a serde::Serialize, 'a serde::Deserialize + Debug&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   fn init(&amp;mut self, esp: ElevatorSpecification, est: ElevatorState&lt;MI&gt;);<br/></span><span class="s1">   fn poll(&amp;mut self, est: ElevatorState&lt;MI&gt;, dst: u64);<br/></span><span class="s1">}<br/><br/></span><span class="s1">impl MotorController<br/></span><span class="s1">&lt;MI: MotorForce + MotorVoltage + Clone, 'a serde::Serialize, 'a serde::Deserialize + Debug&gt;<br/></span><span class="s1">for SimpleMotorController<br/></span><span class="s1">&lt;MI: MotorForce + MotorVoltage + Clone, 'a serde::Serialize, 'a serde::Deserialize + Debug&gt;<br/></span><span class="s1">{<br/>   ...<br/></span><span class="s1">} </span></pre>
+<p>This is all just for one parameter! Fortunately, there is another solution to this problem. The technique uses something called <strong>trait objects</strong>. A trait object is an object implementing a trait but having no known type at compile time. Trait objects, because they have no concrete type, do not need to be parameterized. The downside of trait objects are that they cannot be sized, and therefore must usually be handled indirectly through a Box or some other sized container. Any attempt to size a trait object will result in a compiler error. Similarly, any trait that has a static method, or is otherwise not object-safe, cannot be used with a trait object.</p>
+<p>We can rewrite the <kbd>MotorInput</kbd> and <kbd>ElevatorState</kbd> objects to use trait objects as follows:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">#[derive(Clone,Serialize,Deserialize,Debug)]<br/></span><span class="s1">pub enum SimpleMotorInput<br/></span><span class="s1">{<br/></span><span class="s1">   Up { voltage: f64 },<br/></span><span class="s1">   Down { voltage: f64 }<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub trait MotorInput: MotorForce + MotorVoltage<br/></span><span class="s1">{<br/></span><span class="s1">}<br/></span></pre>
+<pre class="p1" style="padding-left: 30px"><span class="s1"><br/></span><span class="s1">impl MotorInput for SimpleMotorInput {}</span><span class="s1"><br/></span><span class="s1">pub struct ElevatorState<br/></span><span class="s1">{<br/></span><span class="s1">   pub timestamp: f64,<br/></span><span class="s1">   pub location: f64,<br/></span><span class="s1">   pub velocity: f64,<br/></span><span class="s1">   pub acceleration: f64,<br/></span><span class="s1">   pub motor_input: Box&lt;MotorInput&gt;<br/></span><span class="s1">}</span></pre>
+<p>Here, we declare that a <kbd>MotorInput</kbd> trait has two subtraits specifying the behavior. Our <kbd>ElevatorState</kbd> declaration does not require a parameter; however, the <kbd>MotorInput</kbd> trait object must be wrapped in a <kbd>Box</kbd>. This layer of indirection is required due to the inability of the compiler to size the <kbd>MotorInput</kbd> trait object for compilation. Also, because <kbd>MotorInput</kbd> does not implement <kbd>Sized</kbd>, it cannot use the <kbd>Clone</kbd> or <kbd>serde</kbd> macros. Some of our code needs to be changed to accommodate this, but it is not overwhelming.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>

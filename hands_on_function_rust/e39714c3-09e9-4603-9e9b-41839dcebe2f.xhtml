@@ -1,0 +1,45 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+    <head>
+        <title>Scoped data binding</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <meta charset="utf-8"/>
+<meta content="urn:uuid:dd0ab1fe-cf2d-4e17-8acb-531b7ebebf1a" name="Adept.expected.resource"/>
+    </head>
+
+    <body>
+        <section>
+
+                            <header>
+                    <h1 class="header-title">Scoped data binding</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">Variables in Rust are treated much more strictly than in most other languages. Global variables are almost entirely disallowed. Local variables are put under close watch to ensure that allocated data structures are properly deconstructed before going out of scope, but not sooner. This concept of tracking a variable's proper scope is known as <strong>ownership</strong> and <strong>lifetime</strong>.</span></p>
+<p class="p1"><span class="s1">In a simple example, data structures that allocate memory will deconstruct automatically when they go out of scope. No manual memory management is required in <kbd>intro_binding.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">fn scoped() {<br/>    vec![1, 2, 3];<br/>}</pre>
+<p class="p1"><span class="s1">In a slightly more complex example, allocated data structures can be passed around as return values, or referenced, and so on. These exceptions to simple scoping must also be accounted for in <kbd>intro_binding.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">fn scoped2() -&gt; Vec&lt;u32&gt;<br/>{<br/>    vec![1, 2, 3]<br/>}</pre>
+<p class="p1"><span class="s1">This usage tracking can get complicated (and undecidable), so Rust has some rules that restrict when a variable can escape a context. We call this <strong>complex rules ownership</strong>. It can be explained with the following code, in <kbd>intro_binding.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">fn scoped3()<br/>{<br/>    let v1 = vec![1, 2, 3];<br/>    let v2 = v1;<br/>    //it is now illegal to reference v1<br/>    //ownership has been transferred to v2<br/>}</pre>
+<p class="p1"><span class="s1">When it is not possible or desirable to transfer ownership, the <kbd>clone</kbd> trait is encouraged to create a duplicate copy of whatever data is referenced in <kbd>intro_binding.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">fn scoped4()<br/>{<br/>    vec![1, 2, 3].clone();<br/>    "".to_string().clone();<br/>}</pre>
+<p class="p1">Cloning or copying <span class="s1">is not a perfect solution, and comes with a performance overhead. To make Rust faster, and it is pretty fast, we also have the concept of borrowing. Borrowing is a mechanism to receive a direct reference to some data with the promise that ownership will be returned by some specific point. References are indicated by an ampersand. Consider the following example, in <kbd>intro_binding.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">fn scoped5()<br/>{<br/>   fn foo(v1: &amp;Vec&lt;u32&gt;)<br/>   {<br/>       for v in v1<br/>       {<br/>           println!("{}", v);<br/>       }<br/>   }<br/><br/>   let v1 = vec![1, 2, 3];<br/>   foo(&amp;v1);<br/><br/>   //v1 is still valid<br/>   //ownership has been returned<br/>   v1;<br/>}</pre>
+<p>Another benefit of strict ownership is safe concurrency. Each binding is owned by a particular thread, and that ownership can be transferred to new threads with the <kbd>move</kbd> keyword. This has been explained with the following code, in <kbd>intro_binding.rs</kbd>:</p>
+<pre style="padding-left: 30px"><span class="hljs-keyword">use</span><span> std::thread;<br/></span><span class="hljs-function"><span class="hljs-keyword"><br/>fn</span> thread1</span><span>()<br/>{<br/></span><span class="hljs-keyword">   let</span><span> v = </span><span class="hljs-built_in">vec!</span><span>[</span><span class="hljs-number">1</span><span>, </span><span class="hljs-number">2</span><span>, </span><span class="hljs-number">3</span><span>];<br/></span><span class="hljs-keyword"><br/>   let</span><span> handle = thread::spawn(</span><span class="hljs-keyword">move</span><span> || {<br/></span><span class="hljs-built_in">      println!</span><span>(</span><span class="hljs-string">"Here's a vector: {:?}"</span><span>, v);<br/>   });<br/><br/>   handle.join().ok();<br/>}<br/></span></pre>
+<p>To share information between threads, programmers have two main options.</p>
+<p>First, programmers may use the traditional combination of locks and atomic references. This is explained with the following code, in <kbd>intro_binding.rs</kbd>:</p>
+<pre style="padding-left: 30px"><span class="hljs-keyword">use</span><span> std::sync::{Mutex, Arc};<br/></span><span class="hljs-keyword">use</span><span> std::thread;<br/></span><span class="hljs-function"><span class="hljs-keyword"><br/>fn</span> thread2</span><span>()<br/>{<br/></span><span class="hljs-keyword"><br/>   let</span><span> counter = Arc::new(Mutex::new(</span><span class="hljs-number">0</span><span>));<br/></span><span class="hljs-keyword">   let</span><span> </span><span class="hljs-keyword">mut</span><span> handles = </span><span class="hljs-built_in">vec!</span><span>[];<br/></span><span class="hljs-keyword"><br/>   for</span><span> _ </span><span class="hljs-keyword">in</span><span> </span><span class="hljs-number">0</span><span>..</span><span class="hljs-number">10</span><span> {</span><span class="hljs-keyword"><br/>      let</span><span> counter = Arc::clone(&amp;counter);<br/></span><span class="hljs-keyword">      let</span><span> handle = thread::spawn(</span><span class="hljs-keyword">move</span><span> || {<br/></span><span class="hljs-keyword">         let</span><span> </span><span class="hljs-keyword">mut</span><span> num = counter.lock().unwrap();<br/>         *num += </span><span class="hljs-number">1</span><span>;<br/>      });<br/>      handles.push(handle);<br/>   }<br/></span><span class="hljs-keyword"><br/>   for</span><span> handle </span><span class="hljs-keyword">in</span><span> handles {<br/>      handle.join().unwrap();<br/>   }<br/></span><span class="hljs-built_in"><br/>   println!</span><span>(</span><span class="hljs-string">"Result: {}"</span><span>, *counter.lock().unwrap());<br/>}</span></pre>
+<p>Second, channels provide a nice mechanism for message passing and job queuing between threads. The <kbd>send</kbd> trait is also implemented automatically for most objects. Consider the following code, in <kbd>intro_binding.rs</kbd>:</p>
+<pre class="p1" style="padding-left: 30px"><span class="s1">use std::thread;<br/></span><span class="s1">use std::sync::mpsc::channel;</span><span class="s1"><br/><br/>fn thread3() {<br/><br/>    let (sender, receiver) = channel();<br/>    let handle = thread::spawn(move ||{<br/><br/>        //do work<br/>        let v = vec![1, 2, 3];<br/>        sender.send(v).unwrap();<br/><br/>    });<br/><br/>    handle.join().ok();<br/>    receiver.recv().unwrap();<br/>}</span></pre>
+<p>All of this concurrency is type-safe and compiler-enforced. Use threads as much as you want, and if you accidentally try to create a race condition or simple deadlock, then the compiler will stop you. We call this <strong>fearless concurrency</strong>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </body>
+
+</html>
